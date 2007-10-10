@@ -1,0 +1,24 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Public Hudson instance">
+
+    <select class="setting-input" name="bp.serverName">
+      <j:forEach var="hudsonInstance" items="${descriptor.getPublicInstances()}">
+        <f:option value="${hudsonInstance.getName()}" selected="${hudsonInstance.getName()==instance.getServerName()}">${hudsonInstance.getName()}</f:option>
+      </j:forEach>
+    </select>
+
+     <f:entry title="Publish unstable builds">
+      <f:checkbox name="bp.publishUnstableBuilds" checked="${h.defaultToTrue(instance.publishUnstableBuilds)}" />
+    </f:entry>
+
+    <f:entry title="Publish failed builds">
+      <f:checkbox name="bp.publishFailedBuilds" checked="${h.defaultToTrue(instance.publishFailedBuilds)}" />
+    </f:entry>
+
+    <f:entry title="Notification recipients" description="Whitespace-separated list of recipient addresses. E-mail will be sent when publishing is finished.">
+      <input class="setting-input" name="bp.notificationRecipients" type="text" value="${instance.notificationRecipients}"/>
+    </f:entry>
+
+  </f:entry>
+
+</j:jelly>

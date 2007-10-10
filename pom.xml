@@ -1,0 +1,72 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jvnet.hudson.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>1.146</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  
+  <groupId>org.jvnet.hudson.plugins</groupId>
+  <artifactId>build-publisher</artifactId>
+  <packaging>hpi</packaging>
+  <version>1.0</version>
+  <name>Hudson Build-Publisher plugin </name>
+
+  <dependencies>
+
+     <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1-rc1</version>
+     </dependency>
+  </dependencies>
+
+  <build>
+    <!--
+      Since new versions need to overwrite old versions, it's better
+      not to have version number in the .hpi file name.
+    -->
+    <finalName>${project.artifactId}</finalName>
+    <defaultGoal>package</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.jvnet.hudson.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <version>1.7</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>java.net</id>
+      <url>https://maven-repository.dev.java.net/nonav/repository</url>
+      <layout>legacy</layout>
+    </repository>
+    <repository>
+      <id>java.net2</id>
+      <url>https://maven2-repository.dev.java.net/nonav/repository</url>
+    </repository>
+    <repository>
+      <id>hudson-libs</id>
+      <url>https://hudson.dev.java.net/source/browse/*checkout*/hudson/hudson/main/lib</url>
+      <layout>legacy</layout>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>java.net2</id>
+      <url>https://maven2-repository.dev.java.net/nonav/repository</url>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
