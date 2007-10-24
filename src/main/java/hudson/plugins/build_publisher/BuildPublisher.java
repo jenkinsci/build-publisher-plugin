@@ -1,6 +1,10 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Launcher;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Build;
@@ -17,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.jaxen.function.ext.MatrixConcatFunction;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
@@ -52,12 +57,17 @@ public class BuildPublisher extends Publisher {
 
 
 // @Override
-    public boolean perform(Build<?, ?> build, Launcher launcher,
+    public boolean perform(Build build, Launcher launcher,
             BuildListener listener) throws InterruptedException, IOException {
         // don't send failed/unstable builds unless user wishes to do so
         if ((!publishUnstableBuilds && (Result.UNSTABLE == build.getResult()))
                 || (!publishFailedBuilds && (Result.FAILURE == build
                         .getResult()))) {
+            return true;
+        }
+        
+        //It won't work for matrix project
+        if(build instanceof MatrixRun) {
             return true;
         }
 
