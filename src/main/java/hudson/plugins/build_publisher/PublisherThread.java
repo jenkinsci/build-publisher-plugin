@@ -115,6 +115,7 @@ class PublisherThread extends Thread {
                         new StatusInfo(StatusInfo.State.FAILURE_PENDING,
                                 "Error during build publishing", hudsonInstance
                                         .getName(), e));
+                hudsonInstance.postponeRequest(currentRequest);
                 try {// TODO make this configurable
                     Thread.sleep(1000 * 60 * 10);
                 } catch (InterruptedException e1) {
@@ -224,13 +225,14 @@ class PublisherThread extends Thread {
     private void createOrSynchronize(String publicHudson,
             AbstractProject project) throws IOException {
 
-        String projectURL = publicHudson + "/job/" + project.getName();
+        String projectURL = publicHudson + "job/" + project.getName();
+        System.out.println("Project url:"+projectURL);
         String submitConfigUrl = null;
 
         if (!urlExists(projectURL)) {
             // if the project doesn't exist, create it
             submitConfigUrl = publicHudson + "createItem?name="
-                    + Util.escape(project.getName());
+                    + project.getName();
         } else {
             // otherwise just synchronize config file
             submitConfigUrl = projectURL + "/postBuild/acceptConfig";
@@ -243,14 +245,16 @@ class PublisherThread extends Thread {
             throws IOException {
 
         String configXML = updateProjectXml(project);
-        String encodedURL = HTTPBuildTransmitter.encodeURI(submitConfigUrl);
-        PostMethod method = new PostMethod(encodedURL);
+//        String encodedURL = HTTPBuildTransmitter.encodeURI(submitConfigUrl);
+        PostMethod method = new PostMethod();
+        method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
+                                false));
         method.setRequestEntity(new StringRequestEntity(configXML, "text/xml",
                 "utf-8"));
 
         int responseCode = executeMethod(method);
         if (responseCode >= 400) {
-            throw new HttpException(encodedURL
+            throw new HttpException(submitConfigUrl
                     + ": Server responded with status " + responseCode);
         }
     }
@@ -324,8 +328,9 @@ class PublisherThread extends Thread {
 
     private boolean urlExists(String url) throws IOException {
 
-        String uri = HTTPBuildTransmitter.encodeURI(url);
-        PostMethod method = new PostMethod(uri);
+        PostMethod method = new PostMethod();
+        method.setURI(new org.apache.commons.httpclient.URI(url,
+                                false));
         int statusCode = executeMethod(method);
         method.releaseConnection();
         if (statusCode < 300) {

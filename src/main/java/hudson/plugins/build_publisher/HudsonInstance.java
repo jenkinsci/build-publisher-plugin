@@ -184,6 +184,13 @@ public final class HudsonInstance {
             StatusAction.setBuildStatusAction(request, statusInfo);
         }
     }
+    
+    synchronized void postponeRequest(AbstractBuild request) {
+        if (publishRequestQueue.contains(request)) {
+            publishRequestQueue.remove(request);
+            publishRequestQueue.add(request);
+        }
+    }
 
     synchronized AbstractBuild nextRequest() {
         // If there is nothing to do let's wait until next

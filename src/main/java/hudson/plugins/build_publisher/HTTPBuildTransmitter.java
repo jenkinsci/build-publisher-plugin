@@ -162,8 +162,8 @@ public class HTTPBuildTransmitter extends BuildTransmitter {
             if (locationHeader != null) {
                 String redirectLocation = locationHeader.getValue();
                 method
-                        .setURI(new org.apache.commons.httpclient.URI(method.getURI(), redirectLocation,
-                                false));
+                        .setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
+                                true));
                 statusCode = followRedirects(method, hudsonInstance);
             }
         }
