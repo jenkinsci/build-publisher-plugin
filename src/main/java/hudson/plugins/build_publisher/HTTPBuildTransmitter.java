@@ -125,7 +125,7 @@ public class HTTPBuildTransmitter extends BuildTransmitter {
             HudsonInstance hudsonInstance) throws IOException {
         int statusCode = followRedirects(method, hudsonInstance);
 
-        if ((statusCode >= 401) && (statusCode <= 403)) {
+        if ((statusCode >= 401) && (statusCode <= 404)) {
             // Authentication failed, let's try FORM method
             GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
                     + "loginEntry");
