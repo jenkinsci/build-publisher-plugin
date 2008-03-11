@@ -21,35 +21,26 @@ public class StatusInfo {
         this.serverName = serverName;
     }
 
-    @Override
-    public String toString() {
-        StringWriter w = new StringWriter();
-        w.write(text);
+    public State getState() {
+        return state;
+    }
 
-        w.write("<br/><br/><ul><li>");
-        switch (state) {
-        case PENDING:
-        case FAILURE_PENDING:
-            w.write("<a href=\"" + StatusAction.URL
-                    + "/abortTransfer\"> Remove from queue </a>");
-            break;
-        case INPROGRESS:
-            w.write("<a href=\"" + StatusAction.URL
-                    + "/abortTransfer\">Abort transmission</a>");
-            break;
-        default:
-            w.write("<a href=\"" + StatusAction.URL
-                    + "/publishAgain\"> Publish again </a>");
-            break;
-        }
-        w.write("</li></ul>");
+    public Exception getException() {
+        return exception;
+    }
 
-        if (exception != null) {
-            w.write("<br/><br/>");
-            exception.printStackTrace(new PrintWriter(w));
-        }
+    public String getText() {
+        return text;
+    }
 
-        return w.getBuffer().toString();
+    public String getServerName() {
+        return serverName;
+    }
+
+    public String getStackTrace() {
+        StringWriter sw = new StringWriter();
+        exception.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 
     public static enum State {
