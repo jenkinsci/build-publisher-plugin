@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
@@ -247,8 +248,8 @@ public final class HudsonInstance {
             }
 
         } catch (IOException e) {
-            LOGGER.severe("Could not restore publisher queue from "
-                    + file.getFile().getAbsolutePath());
+            LOGGER.log(Level.SEVERE,"Could not restore publisher queue from "
+                    + file.getFile().getAbsolutePath(),e);
         }
     }
 
