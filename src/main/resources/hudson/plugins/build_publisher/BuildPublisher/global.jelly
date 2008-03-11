@@ -1,24 +1,24 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:section title="Build publishing">
     <f:entry title="Public Hudson server"
-      description="List of available public Hudson instances">
+      description="See &lt;a href='http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin'&gt;the plugin description page&lt;/a> for more details.">
       
       <f:repeatable var="serv" items="${descriptor.publicInstances}" noAddButton="true" minimum="1">
         <table width="100%">
-          <f:entry title="name">
+          <f:entry title="name" help="/plugin/build-publisher/help/global/name.html">
             <f:textbox name="name" value="${serv.getName()}"/>
           </f:entry>
 
-          <f:entry title="URL">
+          <f:entry title="URL" help="/plugin/build-publisher/help/global/url.html">
             <f:textbox name="url" value="${serv.getUrl()}"/>
           </f:entry>
 
 
-          <f:entry title="Login">
+          <f:entry title="Login" help="/plugin/build-publisher/help/global/login.html">
             <f:textbox name="login" value="${serv.getLogin()}"/>
           </f:entry>
         
-          <f:entry title="Password">
+          <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
             <input class="setting-input" name="password"
                    type="password" value="${serv.getPassword()}"/>
           </f:entry>
