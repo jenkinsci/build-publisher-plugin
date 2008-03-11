@@ -18,10 +18,10 @@
             <f:textbox name="login" value="${serv.getLogin()}"/>
           </f:entry>
         
-        <f:entry title="Password">
-          <input class="setting-input" name="password"
-                 type="password" value="${serv.getPassword()}"/>
-        </f:entry>
+          <f:entry title="Password">
+            <input class="setting-input" name="password"
+                   type="password" value="${serv.getPassword()}"/>
+          </f:entry>
           
           <f:entry title="">
             <div align="right">
