@@ -6,7 +6,7 @@
         <j:forEach var="hudsonInstance" items="${descriptor.publicInstances}">
           <f:option value="${hudsonInstance.getName()}" selected="${hudsonInstance.getName()==instance.getServerName()}">${hudsonInstance.getName()}</f:option>
         </j:forEach>
-    </select>
+      </select>
     </f:entry>
   </j:if>
 
