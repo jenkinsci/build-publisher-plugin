@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -107,10 +108,7 @@ class PublisherThread extends Thread {
                 }
             } catch (Exception e) {
                 // Something's wrong. Let's wait awhile and try again.
-                HudsonInstance.LOGGER
-                        .warning("Error during build transmission: "
-                                + e.getMessage());
-                e.printStackTrace();
+                HudsonInstance.LOGGER.log(Level.WARNING,"Error during build transmission: "+e.getMessage(),e);
                 StatusAction.setBuildStatusAction(currentRequest,
                         new StatusInfo(StatusInfo.State.FAILURE_PENDING,
                                 "Error during build publishing", hudsonInstance
@@ -119,8 +117,7 @@ class PublisherThread extends Thread {
                 try {// TODO make this configurable
                     Thread.sleep(1000 * 60 * 10);
                 } catch (InterruptedException e1) {
-                    HudsonInstance.LOGGER.severe(e1.toString());
-                    e1.printStackTrace();
+                    HudsonInstance.LOGGER.log(Level.SEVERE,"Build oublisher thread was interrupted",e1);
                 }
             }
 
