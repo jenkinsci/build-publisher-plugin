@@ -232,6 +232,9 @@ public final class HudsonInstance {
     private void restoreQueue() {
         XmlFile file = new XmlFile(new File(Hudson.getInstance().getRootDir(),
                 "bp-" + name + ".xml"));
+        if(!file.exists())
+            return; // nothing to restore.
+        
         try {
             List<RequestHolder> holders = (List<RequestHolder>) file.read();
             for (RequestHolder holder : holders) {
