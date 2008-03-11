@@ -19,6 +19,6 @@
   </f:entry>
 
   <f:entry title="Notification recipients" description="Whitespace-separated list of recipient addresses. E-mail will be sent when publishing is finished.">
-    <input class="setting-input" name="bp.notificationRecipients" type="text" value="${instance.notificationRecipients}"/>
+    <f:textbox name="bp.notificationRecipients" value="${instance.notificationRecipients}"/>
   </f:entry>
 </j:jelly>
