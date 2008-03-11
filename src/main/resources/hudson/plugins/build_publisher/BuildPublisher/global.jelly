@@ -3,7 +3,7 @@
     <f:entry title="Public Hudson server"
       description="List of available public Hudson instances">
       
-      <f:repeatable var="serv" items="${descriptor.publicInstances}">
+      <f:repeatable var="serv" items="${descriptor.publicInstances}" noAddButton="true" minimum="1">
         <table width="100%">
           <f:entry title="name">
             <f:textbox name="name" value="${serv.getName()}"/>
@@ -22,13 +22,13 @@
             <input class="setting-input" name="password"
                    type="password" value="${serv.getPassword()}"/>
           </f:entry>
-          
-          <f:entry title="">
+
+          <f:entry>
             <div align="right">
-              <f:repeatableDeleteButton />
+              <input type="button" value="${%Add more servers...}" class="repeatable-add show-if-last" />
+              <input type="button" value="${%Delete}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
             </div>
           </f:entry>
-          
         </table>
       </f:repeatable>
       
