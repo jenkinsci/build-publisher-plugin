@@ -5,21 +5,17 @@
       
       <f:repeatable var="serv" items="${descriptor.publicInstances}">
         <table width="100%">
-      
           <f:entry title="name">
-            <input class="setting-input" name="name"
-              type="text" value="${serv.getName()}"/>
+            <f:textbox name="name" value="${serv.getName()}"/>
           </f:entry>
 
           <f:entry title="URL">
-            <input class="setting-input" name="url"
-              type="text" value="${serv.getUrl()}"/>
+            <f:textbox name="url" value="${serv.getUrl()}"/>
           </f:entry>
-          
-          
+
+
           <f:entry title="Login">
-            <input class="setting-input" name="login"
-              type="text" value="${serv.getLogin()}"/>
+            <f:textbox name="login" value="${serv.getLogin()}"/>
           </f:entry>
         
         <f:entry title="Password">
