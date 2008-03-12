@@ -4,6 +4,8 @@ import hudson.Plugin;
 import hudson.maven.MavenReporters;
 import hudson.tasks.BuildStep;
 
+import java.util.List;
+
 /**
  * Entry point of a plugin.
  *
@@ -20,6 +22,10 @@ public class PluginImpl extends Plugin {
         // of 'extension points'. In this example, we'll add one builder.
         BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
         MavenReporters.LIST.add(MavenBuildPublisher.DESCRIPTOR);
-// Jobs.PROPERTIES.add(null);
+    }
+
+    // for Jelly
+    public HudsonInstance[] getHudsonInstances() {
+        return BuildPublisher.DESCRIPTOR.getPublicInstances();
     }
 }

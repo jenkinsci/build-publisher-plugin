@@ -34,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -191,6 +192,23 @@ public final class HudsonInstance {
             publishRequestQueue.remove(request);
             publishRequestQueue.add(request);
         }
+    }
+
+    /**
+     * Obtains the current queue of builds that are waiting for publication.
+     */
+    synchronized List<AbstractBuild> getQueue() {
+        return new ArrayList<AbstractBuild>(publishRequestQueue);
+    }
+
+    /**
+     * Gets the thread that does the publication.
+     *
+     * @return
+     *      Can be null during the initialization of Hudson.
+     */
+    public PublisherThread getPublisherThread() {
+        return publisherThread;
     }
 
     synchronized AbstractBuild nextRequest() {
