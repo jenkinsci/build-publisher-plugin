@@ -2,7 +2,11 @@ package hudson.plugins.build_publisher;
 
 import hudson.FilePath;
 import hudson.Util;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
 

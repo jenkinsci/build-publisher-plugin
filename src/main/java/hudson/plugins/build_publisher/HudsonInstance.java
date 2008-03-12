@@ -4,49 +4,29 @@
 package hudson.plugins.build_publisher;
 
 import hudson.XmlFile;
-import hudson.maven.AbstractMavenProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.Project;
 import hudson.model.Run;
-import hudson.model.TopLevelItem;
 import hudson.model.listeners.ItemListener;
-import hudson.plugins.build_publisher.BuildPublisher.BuildPublisherDescriptor;
 import hudson.plugins.build_publisher.StatusInfo.State;
-import hudson.tasks.BuildStep;
-import hudson.tasks.LogRotator;
-import hudson.tasks.Mailer;
-import hudson.tasks.Publisher;
-import hudson.tasks.junit.JUnitResultArchiver;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.FileRequestEntity;
-import org.apache.commons.httpclient.methods.GetMethod;
+import java.util.logging.Logger;
 
 /**
  * Represents remote public Hudson instance.

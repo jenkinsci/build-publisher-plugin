@@ -3,16 +3,14 @@
  */
 package hudson.plugins.build_publisher;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.plugins.build_publisher.StatusInfo.State;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 public class StatusAction implements Action {
 

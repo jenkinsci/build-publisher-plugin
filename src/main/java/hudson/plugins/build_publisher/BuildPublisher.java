@@ -1,28 +1,16 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Launcher;
-import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixConfiguration;
-import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import hudson.model.Job;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.tasks.Publisher;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.logging.Logger;
-
-import org.jaxen.function.ext.MatrixConcatFunction;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * {@link Publisher} responsible for submitting build results to public Hudson

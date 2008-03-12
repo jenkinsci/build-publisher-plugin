@@ -1,6 +1,5 @@
 package hudson.plugins.build_publisher;
 
-import hudson.Util;
 import hudson.XmlFile;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenModule;
@@ -12,26 +11,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Project;
 import hudson.model.StreamBuildListener;
-import hudson.tasks.MailSender;
-import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -42,6 +22,9 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultElement;
+
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * {@link Thread} responsible for reading the queue and sending builds.

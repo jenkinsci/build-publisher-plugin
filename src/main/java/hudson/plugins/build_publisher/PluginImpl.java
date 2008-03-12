@@ -4,8 +4,6 @@ import hudson.Plugin;
 import hudson.maven.MavenReporters;
 import hudson.tasks.BuildStep;
 
-import java.util.List;
-
 /**
  * Entry point of a plugin.
  *

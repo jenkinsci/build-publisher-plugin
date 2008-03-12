@@ -1,16 +1,14 @@
 package hudson.plugins.build_publisher;
 
-import java.io.IOException;
-
-import org.kohsuke.stapler.StaplerRequest;
-
 import hudson.Launcher;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenReporter;
 import hudson.maven.MavenReporterDescriptor;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.model.Descriptor.FormException;
+import org.kohsuke.stapler.StaplerRequest;
+
+import java.io.IOException;
 
 public class MavenBuildPublisher extends MavenReporter {
 

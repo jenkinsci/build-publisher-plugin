@@ -1,11 +1,10 @@
 package hudson.plugins.build_publisher;
 
-import java.io.IOException;
-
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.util.IOException2;
+
+import java.io.IOException;
 
 public abstract class BuildTransmitter {
 
