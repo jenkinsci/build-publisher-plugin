@@ -47,7 +47,8 @@ import org.dom4j.tree.DefaultElement;
  * {@link Thread} responsible for reading the queue and sending builds.
  */
 class PublisherThread extends Thread {
-
+    // FIXME: I don't think synchronization on this variable works
+    // What's the point of locking on Boolean? - KK
     private Boolean aborted = true;
     private AbstractBuild currentRequest = null;
 
