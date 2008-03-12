@@ -7,6 +7,7 @@ import hudson.tasks.BuildStep;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.QueryParameter;
+import hudson.model.Jobs;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class PluginImpl extends Plugin {
         // of 'extension points'. In this example, we'll add one builder.
         BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
         MavenReporters.LIST.add(MavenBuildPublisher.DESCRIPTOR);
+        Jobs.PROPERTIES.add(ExternalProjectProperty.DESCRIPTOR);
     }
 
     // for Jelly
