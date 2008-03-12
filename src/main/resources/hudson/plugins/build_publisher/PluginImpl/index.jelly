@@ -20,6 +20,13 @@
             </ol>
           </j:otherwise>
         </j:choose>
+
+        <j:set var="s" value="${h.publisherThread.currentState}" />
+        <j:if test="${s!=null}">
+          <h3>Thread state</h3>
+          <!-- avoid passing null to 'it', which causes infinite recursion and kills Hudson -->
+          <st:include it="${s}" page="index.jelly" />
+        </j:if>
       </j:forEach>
     </l:main-panel>
   </l:layout>

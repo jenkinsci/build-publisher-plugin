@@ -1,8 +1,15 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Plugin;
+import hudson.model.Hudson;
 import hudson.maven.MavenReporters;
 import hudson.tasks.BuildStep;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.QueryParameter;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Entry point of a plugin.
@@ -25,5 +32,19 @@ public class PluginImpl extends Plugin {
     // for Jelly
     public HudsonInstance[] getHudsonInstances() {
         return BuildPublisher.DESCRIPTOR.getPublicInstances();
+    }
+
+    public void doRetryNow(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
+        Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
+
+        HudsonInstance h = BuildPublisher.DESCRIPTOR.getHudsonInstanceForName(name);
+        if(h==null) {
+            rsp.sendError(HttpServletResponse.SC_BAD_REQUEST,"No such name: "+name);
+            return;
+        }
+        
+        h.getPublisherThread().interrupt();
+
+        rsp.sendRedirect(".");
     }
 }

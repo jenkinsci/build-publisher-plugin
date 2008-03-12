@@ -35,8 +35,10 @@ public class PublisherThread extends Thread {
     private Boolean aborted = true;
     private AbstractBuild currentRequest = null;
 
+    private volatile ThreadState state = ThreadState.IDLE;
+
     /**
-     *
+     * The public Hudson that this thread is publishing to.
      */
     private final HudsonInstance hudsonInstance;
 
@@ -44,68 +46,94 @@ public class PublisherThread extends Thread {
      * @param hudsonInstance
      */
     PublisherThread(HudsonInstance hudsonInstance) {
-        super("Hudson - Build-Publisher Thread");
+        super("Hudson - Build-Publisher Thread for "+hudsonInstance.getName());
         this.hudsonInstance = hudsonInstance;
     }
 
     @Override
     public void run() {
+        try {
+            while (true) {
+                state = ThreadState.IDLE;
+                currentRequest = hudsonInstance.nextRequest();
 
-        while (true) {
-
-            currentRequest = hudsonInstance.nextRequest();
-            synchronized (aborted) {
-                aborted = false;
-                StatusAction.setBuildStatusAction(currentRequest,
-                        new StatusInfo(StatusInfo.State.INPROGRESS,
-                                "Build is being transmitted", hudsonInstance
-                                        .getName(), null));
-            }
-
-            try {
-                // Proceed transmission
-                synchronizeProjectSettings(hudsonInstance.getUrl(),
-                        currentRequest.getProject());
-                hudsonInstance.buildTransmitter.sendBuild(currentRequest,
-                        currentRequest.getProject(), hudsonInstance);
-
+                state = new ThreadState.Publishing(currentRequest);
                 synchronized (aborted) {
-                    if (!aborted) {
-                        sendMailNotification(currentRequest);
-                        // Notify about success
-                        HudsonInstance.LOGGER.info("Build #"
-                                + currentRequest.getNumber() + " of project "
-                                + currentRequest.getProject().getDisplayName()
-                                + " was published.");
-
-                        hudsonInstance
-                                .removeRequest(
-                                        currentRequest,
-                                        new StatusInfo(
-                                                StatusInfo.State.SUCCESS,
-                                                "Build transmission was successfully completed",
-                                                hudsonInstance.getName(), null));
-
-                        aborted = true;
-                    }
-
+                    aborted = false;
+                    StatusAction.setBuildStatusAction(currentRequest,
+                            new StatusInfo(StatusInfo.State.INPROGRESS,
+                                    "Build is being transmitted", hudsonInstance
+                                            .getName(), null));
                 }
-            } catch (Exception e) {
-                // Something's wrong. Let's wait awhile and try again.
-                HudsonInstance.LOGGER.log(Level.WARNING,"Error during build transmission: "+e.getMessage(),e);
-                StatusAction.setBuildStatusAction(currentRequest,
-                        new StatusInfo(StatusInfo.State.FAILURE_PENDING,
-                                "Error during build publishing", hudsonInstance
-                                        .getName(), e));
-                hudsonInstance.postponeRequest(currentRequest);
-                try {// TODO make this configurable
-                    Thread.sleep(1000 * 60 * 10);
-                } catch (InterruptedException e1) {
-                    HudsonInstance.LOGGER.log(Level.SEVERE,"Build oublisher thread was interrupted",e1);
+
+                try {
+                    // Proceed transmission
+                    synchronizeProjectSettings(hudsonInstance.getUrl(),
+                            currentRequest.getProject());
+                    hudsonInstance.buildTransmitter.sendBuild(currentRequest,
+                            currentRequest.getProject(), hudsonInstance);
+
+                    synchronized (aborted) {
+                        if (!aborted) {
+                            sendMailNotification(currentRequest);
+                            // Notify about success
+                            HudsonInstance.LOGGER.info("Build #"
+                                    + currentRequest.getNumber() + " of project "
+                                    + currentRequest.getProject().getDisplayName()
+                                    + " was published.");
+
+                            hudsonInstance
+                                    .removeRequest(
+                                            currentRequest,
+                                            new StatusInfo(
+                                                    StatusInfo.State.SUCCESS,
+                                                    "Build transmission was successfully completed",
+                                                    hudsonInstance.getName(), null));
+
+                            aborted = true;
+                        }
+
+                    }
+                } catch (Exception e) {
+                    // Something's wrong. Let's wait awhile and try again.
+                    HudsonInstance.LOGGER.log(Level.WARNING,"Error during build transmission: "+e.getMessage(),e);
+                    StatusAction.setBuildStatusAction(currentRequest,
+                            new StatusInfo(StatusInfo.State.FAILURE_PENDING,
+                                    "Error during build publishing", hudsonInstance
+                                            .getName(), e));
+                    hudsonInstance.postponeRequest(currentRequest);
+
+                    // TODO make this configurable
+                    final long timeout = System.currentTimeMillis() + 1000*60*10;
+                    state = new ThreadState.ErrorRecoveryWait(timeout,currentRequest,e);
+
+                    try {
+                        while(System.currentTimeMillis() < timeout)
+                            Thread.sleep(timeout-System.currentTimeMillis());
+                    } catch (InterruptedException e1) {
+                        // note that this also happens when the administrator manually forced a retry,
+                        // ignoring timeout
+                        HudsonInstance.LOGGER.log(Level.SEVERE,"Build oublisher thread was interrupted",e1);
+                    }
                 }
             }
-
+        } catch(Error e) {
+            state = new ThreadState.Dead(e);
+            throw e;
+        } catch(RuntimeException e) {
+            state = new ThreadState.Dead(e);
+            throw e;
         }
+    }
+
+    /**
+     * Gets an immutable object representing what this thread is currently doing.
+     *
+     * @return
+     *      never null.
+     */
+    public ThreadState getCurrentState() {
+        return state;
     }
 
     private void sendMailNotification(AbstractBuild request) {
