@@ -166,7 +166,21 @@ class PublisherThread extends Thread {
         }
     }
 
+    /**
+     * Cancels the transmission of the given build.
+     * If the build is being transmitted, a cancellation is attempted.
+     */
     public void abortTrasmission(AbstractBuild request) {
+        // FIXME: this is broken in so many levels
+        // first the synchronization is wrong, and
+        // then request==null check is wrong, because currentRequest can be null,
+        // in which case it would cause NPE.
+        // And then, there's no guarantee that a buildTransmitter is doing the work when
+        // this method is invoked, so the cancellation could fail to cancel.
+        //
+        // in general, I don't think it's possible to cleanly cancel a transmission that's in progress.
+        // the best you can do is to interrupt the thread and hope the thread would take notice.
+        // -KK
         synchronized (aborted) {
             if ((request == null) || ((request == currentRequest) && !aborted)) {
                 // build is being transmitted - let's stop it
