@@ -102,9 +102,10 @@ public final class HudsonInstance {
         notifyAll();
     }
 
-    public void abortTransmission(AbstractBuild request) {
-        publisherThread.abortTrasmission(request);
-    }
+    //Disable aborting until it is properly implemented
+    //public void abortTransmission(AbstractBuild request) {
+    //    publisherThread.abortTrasmission(request);
+    //}
 
     // XStream init
     private Object readResolve() {
@@ -127,8 +128,11 @@ public final class HudsonInstance {
         buildTransmitter = new HTTPBuildTransmitter();
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
         client = new HttpClient(connectionManager);
+        
         // --- authentication
-        setCredentialsFroClient(client);
+        
+        //We don't use BASIC auth
+        //setCredentialsFroClient(client);
     }
 
     private void initPublisherThread() {

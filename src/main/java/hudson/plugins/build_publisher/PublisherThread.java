@@ -30,9 +30,10 @@ import java.util.logging.Level;
  * {@link Thread} responsible for reading the queue and sending builds.
  */
 public class PublisherThread extends Thread {
-    // FIXME: I don't think synchronization on this variable works
+    
     // What's the point of locking on Boolean? - KK
-    private Boolean aborted = true;
+    // None. - David
+    
     private AbstractBuild currentRequest = null;
 
     private volatile ThreadState state = ThreadState.IDLE;
@@ -58,13 +59,12 @@ public class PublisherThread extends Thread {
                 currentRequest = hudsonInstance.nextRequest();
 
                 state = new ThreadState.Publishing(currentRequest);
-                synchronized (aborted) {
-                    aborted = false;
-                    StatusAction.setBuildStatusAction(currentRequest,
-                            new StatusInfo(StatusInfo.State.INPROGRESS,
-                                    "Build is being transmitted", hudsonInstance
-                                            .getName(), null));
-                }
+                
+                StatusAction.setBuildStatusAction(currentRequest,
+                        new StatusInfo(StatusInfo.State.INPROGRESS,
+                                "Build is being transmitted", hudsonInstance
+                                        .getName(), null));
+                
 
                 try {
                     // Proceed transmission
@@ -73,27 +73,22 @@ public class PublisherThread extends Thread {
                     hudsonInstance.buildTransmitter.sendBuild(currentRequest,
                             currentRequest.getProject(), hudsonInstance);
 
-                    synchronized (aborted) {
-                        if (!aborted) {
-                            sendMailNotification(currentRequest);
-                            // Notify about success
-                            HudsonInstance.LOGGER.info("Build #"
-                                    + currentRequest.getNumber() + " of project "
-                                    + currentRequest.getProject().getDisplayName()
-                                    + " was published.");
+                 
+                    sendMailNotification(currentRequest);
+                    // Notify about success
+                    HudsonInstance.LOGGER.info("Build #"
+                            + currentRequest.getNumber() + " of project "
+                            + currentRequest.getProject().getDisplayName()
+                            + " was published.");
 
-                            hudsonInstance
-                                    .removeRequest(
-                                            currentRequest,
-                                            new StatusInfo(
-                                                    StatusInfo.State.SUCCESS,
-                                                    "Build transmission was successfully completed",
-                                                    hudsonInstance.getName(), null));
-
-                            aborted = true;
-                        }
-
-                    }
+                    hudsonInstance
+                            .removeRequest(
+                                    currentRequest,
+                                    new StatusInfo(
+                                            StatusInfo.State.SUCCESS,
+                                            "Build transmission was successfully completed",
+                                            hudsonInstance.getName(), null));                       
+                   
                 } catch (Exception e) {
                     // Something's wrong. Let's wait awhile and try again.
                     HudsonInstance.LOGGER.log(Level.WARNING,"Error during build transmission: "+e.getMessage(),e);
@@ -181,6 +176,8 @@ public class PublisherThread extends Thread {
      * Cancels the transmission of the given build.
      * If the build is being transmitted, a cancellation is attempted.
      */
+    
+    /* 
     public void abortTrasmission(AbstractBuild request) {
         // FIXME: this is broken in so many levels
         // first the synchronization is wrong, and
@@ -192,24 +189,22 @@ public class PublisherThread extends Thread {
         // in general, I don't think it's possible to cleanly cancel a transmission that's in progress.
         // the best you can do is to interrupt the thread and hope the thread would take notice.
         // -KK
-        synchronized (aborted) {
-            if ((request == null) || ((request == currentRequest) && !aborted)) {
-                // build is being transmitted - let's stop it
-                aborted = true;
-                HudsonInstance.LOGGER.info("Publishing of Build #"
-                        + currentRequest.getNumber() + " of project "
-                        + currentRequest.getProject().getDisplayName()
-                        + " was canceled.");
-                hudsonInstance.buildTransmitter.abortTransmission();
-            }
+      
+        // I still believe it is possible. Anyway, let's disable it for now. - DV
+     
+            
+        HudsonInstance.LOGGER.info("Publishing of Build #"
+                + currentRequest.getNumber() + " of project "
+                + currentRequest.getProject().getDisplayName()
+                + " was canceled.");
+        hudsonInstance.buildTransmitter.abortTransmission();
 
-            hudsonInstance.removeRequest(request, new StatusInfo(
-                    StatusInfo.State.INTERRUPTED,
-                    "Build transmission was aborted by user", hudsonInstance
-                            .getName(), null));
-
-        }
-    }
+        hudsonInstance.removeRequest(request, new StatusInfo(
+                StatusInfo.State.INTERRUPTED,
+                "Build transmission was aborted by user", hudsonInstance
+                        .getName(), null));
+     
+    }*/
 
     /**
      * Creates new project on the public server in case it doesn't already exist

@@ -55,6 +55,7 @@ public class StatusAction implements Action {
         return URL;
     }
 
+    /* Disable aborting until it is properly implemented
     public void doAbortTransfer(StaplerRequest req, StaplerResponse rsp)
             throws ServletException, IOException {
         HudsonInstance instance = BuildPublisher.DESCRIPTOR
@@ -63,7 +64,7 @@ public class StatusAction implements Action {
             instance.abortTransmission(owner);
         }
         rsp.forwardToPreviousPage(req);
-    }
+    }*/
 
     public void doPublishAgain(StaplerRequest req, StaplerResponse rsp)
             throws ServletException, IOException {

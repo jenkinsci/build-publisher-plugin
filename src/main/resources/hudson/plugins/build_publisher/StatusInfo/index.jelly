@@ -13,7 +13,9 @@
       <local:form action="abortTransfer" title="Remove from queue" />
     </j:when>
     <j:when test="${it.state.name()=='INPROGRESS'}">
-      <local:form action="abortTransfer" title="Abort transmission" />
+      <!-- Disable aborting until it is properly implemented
+          <local:form action="abortTransfer" title="Abort transmission" />
+      -->
     </j:when>
     <j:otherwise>
       <local:form action="publishAgain" title="Publish again" />
