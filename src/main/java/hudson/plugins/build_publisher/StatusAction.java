@@ -1,6 +1,3 @@
-/**
- *
- */
 package hudson.plugins.build_publisher;
 
 import hudson.model.AbstractBuild;
@@ -12,6 +9,11 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+/**
+ * Build action displaying publishing status.
+ * 
+ * @author dvrzalik
+ */
 public class StatusAction implements Action {
 
     private StatusInfo statusInfo;
@@ -66,6 +68,9 @@ public class StatusAction implements Action {
         rsp.forwardToPreviousPage(req);
     }*/
 
+    /**
+     * Sends the build once more.
+     */
     public void doPublishAgain(StaplerRequest req, StaplerResponse rsp)
             throws ServletException, IOException {
         HudsonInstance instance = BuildPublisher.DESCRIPTOR

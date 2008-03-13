@@ -214,6 +214,9 @@ public final class HudsonInstance {
         }
     }
 
+    /**
+     * Serializes the queue into $HUDSON_HOME
+     */
     private void saveQueue() {
         List<RequestHolder> holders = new LinkedList<RequestHolder>();
         for (AbstractBuild request : publishRequestQueue) {
