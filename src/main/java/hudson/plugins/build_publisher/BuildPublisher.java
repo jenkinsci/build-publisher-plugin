@@ -2,7 +2,7 @@ package hudson.plugins.build_publisher;
 
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
-import hudson.model.Build;
+import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Result;
@@ -28,24 +28,8 @@ public class BuildPublisher extends Publisher {
 
     private transient HudsonInstance publicHudsonInstance;
 
-    /**
-     * @stapler-constructor
-     */
-//    public BuildPublisher(String serverName, boolean publishUnstableBuilds,
-//            boolean publishFailedBuilds, String notificationRecipients) {
-//        this.serverName = serverName;
-//        this.notificationRecipients = notificationRecipients;
-//        this.publishFailedBuilds = publishFailedBuilds;
-//        this.publishUnstableBuilds = publishUnstableBuilds;
-//    }
-
-    public BuildPublisher() {
-
-    }
-
-
-// @Override
-    public boolean perform(Build build, Launcher launcher,
+    @Override
+    public boolean perform(AbstractBuild build, Launcher launcher,
             BuildListener listener) throws InterruptedException, IOException {
         // don't send failed/unstable builds unless user wishes to do so
         if ((!publishUnstableBuilds && (Result.UNSTABLE == build.getResult()))
