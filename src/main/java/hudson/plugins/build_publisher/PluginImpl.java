@@ -4,7 +4,6 @@ import hudson.Plugin;
 import hudson.model.Hudson;
 import hudson.model.ManagementLink;
 import hudson.model.Jobs;
-import hudson.maven.MavenReporters;
 import hudson.tasks.BuildStep;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -28,7 +27,6 @@ public class PluginImpl extends Plugin {
         // plugins normally extend Hudson by providing custom implementations
         // of 'extension points'. In this example, we'll add one builder.
         BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
-        MavenReporters.LIST.add(MavenBuildPublisher.DESCRIPTOR);
         Jobs.PROPERTIES.add(ExternalProjectProperty.DESCRIPTOR);
 
         ManagementLink.LIST.add(new ManagementLink() {

@@ -72,7 +72,15 @@ public class PublisherThread extends Thread {
                             currentRequest.getProject());
                     hudsonInstance.buildTransmitter.sendBuild(currentRequest,
                             currentRequest.getProject(), hudsonInstance);
-
+                    
+                    //Publish maven module builds
+                    if(currentRequest instanceof MavenModuleSetBuild) {
+                        for(MavenBuild moduleBuild: ((MavenModuleSetBuild) currentRequest)
+                                .getModuleLastBuilds().values()) {
+                            hudsonInstance.buildTransmitter.sendBuild(moduleBuild,
+                                    moduleBuild.getProject(), hudsonInstance);
+                        }
+                    } 
                  
                     sendMailNotification(currentRequest);
                     // Notify about success
@@ -214,30 +222,22 @@ public class PublisherThread extends Thread {
             AbstractProject project) throws IOException {
 
         assertUrlExists(publicHudson);
-
-        if (project instanceof MavenModule) {
-            MavenModuleSet parentProject = ((MavenModule) project).getParent();
-            createOrSynchronize(publicHudson, parentProject);
-
-            String parentURL = publicHudson + "job/" + parentProject.getName();
-
-            MavenModuleSetBuild parentBuild = parentProject.getLastBuild();
-            if (!urlExists(parentURL + "/" + parentBuild.getNumber())) {
-                hudsonInstance.publishNewBuild(parentBuild);
-            }
-
-            String moduleModuleSystemName = ((MavenModule) project)
+        createOrSynchronize(publicHudson, project);
+        
+        if (project instanceof MavenModuleSet) {
+            //if this is main maven project, synchronize also its modules
+            String parentURL = publicHudson + "job/" + project.getName();
+            
+            for(MavenModule module: ((MavenModuleSet) project).getModules()) {
+                String moduleModuleSystemName = ((MavenModule) module)
                     .getModuleName().toFileSystemName();
-
-            if (!urlExists(parentURL + "/" + moduleModuleSystemName)) {
-                submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
-                        + moduleModuleSystemName, project);
+                
+                if (!urlExists(parentURL + "/" + moduleModuleSystemName)) {
+                    submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
+                        + moduleModuleSystemName, module);
+                }
             }
-
-        } else {
-            createOrSynchronize(publicHudson, project);
-        }
-
+        } 
     }
 
     private void createOrSynchronize(String publicHudson,
