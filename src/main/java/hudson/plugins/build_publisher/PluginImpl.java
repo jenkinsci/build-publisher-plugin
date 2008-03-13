@@ -2,12 +2,13 @@ package hudson.plugins.build_publisher;
 
 import hudson.Plugin;
 import hudson.model.Hudson;
+import hudson.model.ManagementLink;
+import hudson.model.Jobs;
 import hudson.maven.MavenReporters;
 import hudson.tasks.BuildStep;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.QueryParameter;
-import hudson.model.Jobs;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,6 +30,24 @@ public class PluginImpl extends Plugin {
         BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
         MavenReporters.LIST.add(MavenBuildPublisher.DESCRIPTOR);
         Jobs.PROPERTIES.add(ExternalProjectProperty.DESCRIPTOR);
+
+        ManagementLink.LIST.add(new ManagementLink() {
+            public String getIconFileName() {
+                return "redo.gif";
+            }
+
+            public String getUrlName() {
+                return "plugin/build-publisher/";
+            }
+
+            public String getDisplayName() {
+                return "Build Publishing Status";
+            }
+
+            public String getDescription() {
+                return "Monitor the status of <a href='http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin'>the build-publisher plugin</a>";
+            }
+        });
     }
 
     // for Jelly
