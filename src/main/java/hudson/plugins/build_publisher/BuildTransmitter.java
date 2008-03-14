@@ -6,21 +6,26 @@ import hudson.util.IOException2;
 
 import java.io.IOException;
 
-public abstract class BuildTransmitter {
+/**
+ * Base interface for build transmitters.
+ * 
+ * @author dvrzalik
+ */
+public interface BuildTransmitter {
+    
+    /**
+     * Publishes the build onto the public istance. 
+     * Implementing class can assume that the project is already configured.
+     * 
+     * @param build Build to publish
+     * @param hudsonInstance Targetted public hudson
+     * @throws java.io.IOException when an error occures
+     */
+    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance) throws IOException;
 
-    public void sendBuild(AbstractBuild build, AbstractProject project,HudsonInstance hudsonInstance)
-            throws IOException {
-        try {
-            proceedTransmission(build, project,hudsonInstance);
-
-        } catch (Exception e) {
-            throw new IOException2("Build transmission failed", e);
-        }
-    }
-
-    protected abstract void proceedTransmission(AbstractBuild build, AbstractProject project,HudsonInstance hudsonInstance)
-            throws IOException;
-
-    public abstract void abortTransmission();
+    /**
+     * Aborts transmission. (optional?)
+     */
+    public void abortTransmission();
 
 }

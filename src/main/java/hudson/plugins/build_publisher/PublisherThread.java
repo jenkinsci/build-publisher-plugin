@@ -71,14 +71,14 @@ public class PublisherThread extends Thread {
                     synchronizeProjectSettings(hudsonInstance.getUrl(),
                             currentRequest.getProject());
                     hudsonInstance.buildTransmitter.sendBuild(currentRequest,
-                            currentRequest.getProject(), hudsonInstance);
+                            hudsonInstance);
                     
                     //Publish maven module builds
                     if(currentRequest instanceof MavenModuleSetBuild) {
                         for(MavenBuild moduleBuild: ((MavenModuleSetBuild) currentRequest)
                                 .getModuleLastBuilds().values()) {
-                            hudsonInstance.buildTransmitter.sendBuild(moduleBuild,
-                                    moduleBuild.getProject(), hudsonInstance);
+                            hudsonInstance.buildTransmitter.sendBuild(moduleBuild, 
+                                    hudsonInstance);
                         }
                     } 
                  

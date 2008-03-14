@@ -40,18 +40,19 @@ import java.net.URISyntaxException;
  * Sends build result via HTTP protocol.
  *
  */
-public class HTTPBuildTransmitter extends BuildTransmitter {
+public class HTTPBuildTransmitter implements BuildTransmitter {
 
     private PostMethod method;
     private boolean aborted = false;
 
     @Override
-    protected void proceedTransmission(AbstractBuild build,
-            AbstractProject project, HudsonInstance hudsonInstance)
+    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance)
             throws IOException {
 
         aborted = false;
 
+        AbstractProject project = build.getProject();
+        
         String jobUrl = "job/";
         if (project instanceof MavenModule) {
             jobUrl += ((MavenModule) project).getParent().getName()
