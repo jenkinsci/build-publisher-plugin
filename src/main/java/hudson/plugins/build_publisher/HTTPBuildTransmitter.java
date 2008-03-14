@@ -1,6 +1,7 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Functions;
+import hudson.Util;
 import hudson.XmlFile;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSetBuild;
@@ -204,7 +205,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         }
 
         File buildFile = new File(build.getRootDir(), "build.xml");
-        String buildXml = updateBuildXml(buildFile, build);
+        String buildXml = Util.loadFile(buildFile);
         byte[] bytes = buildXml.getBytes();
         writeStreamToTar(tar, new ByteArrayInputStream(bytes), buildXmlFile,
                 bytes.length, buffer);
@@ -212,39 +213,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         tar.close();
 
         return files.length;
-    }
-
-    private String updateBuildXml(File buildFile, AbstractBuild build)
-            throws IOException {
-        XmlFile file = new XmlFile(buildFile);
-        SAXReader reader = new SAXReader();
-
-        try {
-            Document document = reader.read(buildFile);
-
-            Node property = document
-                    .selectSingleNode("//actions/hudson.plugins.build__publisher.StatusAction");
-            if (property != null) {
-                property.detach();
-            }
-
-            if (build instanceof MavenModuleSetBuild) {
-                Element root = document.getRootElement();
-                Element result = root.element("result");
-                if (result == null) {
-                    result = new DefaultElement("result");
-                    root.add(result);
-                }
-                // hudson sets FAILURE as default result, which isn't overriden
-                // by successful modules on the public instance
-                result.setText(Result.SUCCESS.toString());
-            }
-
-            return document.asXML();
-        } catch (DocumentException e) {
-            e.printStackTrace();
-            return file.asString();
-        }
     }
 
     private void writeStreamToTar(TarOutputStream tar, InputStream in,
