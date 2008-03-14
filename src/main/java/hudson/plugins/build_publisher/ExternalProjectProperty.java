@@ -3,6 +3,7 @@ package hudson.plugins.build_publisher;
 import hudson.Util;
 import hudson.XmlFile;
 import hudson.maven.MavenModule;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Job;
@@ -27,9 +28,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -131,6 +135,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             oldBuildIDs.add(run.getId());
         }
 
+        //Untar incoming builds unto the build directory
         Untar untar = new Untar();
         untar.setProject(new org.apache.tools.ant.Project());
         untar.add(new InputStreamResource(project.getName(),
@@ -140,14 +145,25 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
         try {
             untar.execute();
-
+            
+            //Load incoming builds from disk
             reloadProject(project);
-
-            int nextBuildNumber = findNextBuildNumber();
+            
+            //Remove publishing status actions (so that they don't confuse users).
+            //We don't know which (or how many) builds arrive - need to check them all
+            for(Run build: (List<Run>) project.getBuilds()) {
+                StatusAction statusAction = build.getAction(StatusAction.class);
+                if(statusAction != null) {
+                    build.getActions().remove(statusAction);
+                    build.save();
+                }
+            }
+            
+            //Update next build number
+            int nextBuildNumber = project.getLastBuild().number + 1;
             TextFile f = new TextFile(new File(project.getRootDir(),
                     "nextBuildNumber"));
             f.write(String.valueOf(nextBuildNumber));
-
             // Second reload just because of the build number. :(
             reloadProject(project);
 
@@ -206,17 +222,6 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         } else {
             project.onLoad(project.getParent(), project.getName());
         }
-    }
-
-    private int findNextBuildNumber() {
-        List<Run> allBuilds = (List<Run>) project.getBuilds();
-        int nextBuildNumber = project.getNextBuildNumber();
-        for (Run run : allBuilds) {
-            if (run.getNumber() >= nextBuildNumber) {
-                nextBuildNumber = run.getNumber() + 1;
-            }
-        }
-        return nextBuildNumber;
     }
 
     private static class InputStreamResource extends Resource {
