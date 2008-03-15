@@ -66,4 +66,18 @@ public class PluginImpl extends Plugin {
 
         rsp.sendRedirect(".");
     }
+
+    public void doResurrect(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
+        Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
+
+        HudsonInstance h = BuildPublisher.DESCRIPTOR.getHudsonInstanceForName(name);
+        if(h==null) {
+            rsp.sendError(HttpServletResponse.SC_BAD_REQUEST,"No such name: "+name);
+            return;
+        }
+
+        h.initPublisherThread();
+
+        rsp.sendRedirect(".");
+    }
 }

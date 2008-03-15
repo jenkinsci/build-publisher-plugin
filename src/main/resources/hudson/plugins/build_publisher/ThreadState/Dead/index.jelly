@@ -3,4 +3,8 @@
     Dead(!)
   </div>
   <pre>${it.stackTrace}</pre>
+  <form action="resurrect">
+    <input type="hidden" name="name" value="${h.name}"/>
+    <f:submit value="Resurrect" />
+  </form>
 </j:jelly>

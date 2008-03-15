@@ -140,8 +140,8 @@ public final class HudsonInstance {
         //setCredentialsFroClient(client);
     }
 
-    private void initPublisherThread() {
-        if(publisherThread == null) {
+    /*package*/ void initPublisherThread() {
+        if(publisherThread == null || !publisherThread.isAlive()) {
             publisherThread = new PublisherThread(HudsonInstance.this);
             publisherThread.start();
         }
