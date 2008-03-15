@@ -3,8 +3,8 @@
  */
 package hudson.plugins.build_publisher;
 
-import hudson.XmlFile;
 import hudson.Util;
+import hudson.XmlFile;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;

@@ -1,8 +1,6 @@
 package hudson.plugins.build_publisher;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.util.IOException2;
 
 import java.io.IOException;
 

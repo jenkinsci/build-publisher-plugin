@@ -1,10 +1,10 @@
 package hudson.plugins.build_publisher;
 
-import hudson.model.AbstractBuild;
 import hudson.Util;
+import hudson.model.AbstractBuild;
 
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * The current state of {@link PublisherThread}.

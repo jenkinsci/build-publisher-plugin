@@ -2,12 +2,9 @@ package hudson.plugins.build_publisher;
 
 import hudson.Functions;
 import hudson.Util;
-import hudson.XmlFile;
 import hudson.maven.MavenModule;
-import hudson.maven.MavenModuleSetBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Result;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -19,12 +16,6 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarOutputStream;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;

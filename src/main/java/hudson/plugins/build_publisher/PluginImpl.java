@@ -2,12 +2,12 @@ package hudson.plugins.build_publisher;
 
 import hudson.Plugin;
 import hudson.model.Hudson;
-import hudson.model.ManagementLink;
 import hudson.model.Jobs;
+import hudson.model.ManagementLink;
 import hudson.tasks.BuildStep;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

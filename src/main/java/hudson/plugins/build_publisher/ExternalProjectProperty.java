@@ -3,7 +3,6 @@ package hudson.plugins.build_publisher;
 import hudson.Util;
 import hudson.XmlFile;
 import hudson.maven.MavenModule;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Job;
@@ -28,14 +27,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Recieves builds submitted remotely via HTTP.
