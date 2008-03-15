@@ -31,9 +31,6 @@ import java.util.logging.Level;
  */
 public class PublisherThread extends Thread {
     
-    // What's the point of locking on Boolean? - KK
-    // None. - David
-    
     private AbstractBuild currentRequest = null;
 
     private volatile ThreadState state = ThreadState.IDLE;
