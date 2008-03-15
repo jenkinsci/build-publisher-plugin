@@ -1,6 +1,7 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Plugin;
+import hudson.util.FormFieldValidator;
 import hudson.model.Hudson;
 import hudson.model.Jobs;
 import hudson.model.ManagementLink;
@@ -10,6 +11,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 import java.io.IOException;
 
 /**
@@ -79,5 +81,10 @@ public class PluginImpl extends Plugin {
         h.initPublisherThread();
 
         rsp.sendRedirect(".");
+    }
+
+    // form field validation
+    public void doCheckHudsonUrl(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        new FormFieldValidator.HudsonURL(req,rsp).process();
     }
 }

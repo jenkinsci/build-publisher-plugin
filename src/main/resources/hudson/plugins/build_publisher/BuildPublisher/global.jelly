@@ -10,7 +10,7 @@
           </f:entry>
 
           <f:entry title="URL" help="/plugin/build-publisher/help/global/url.html">
-            <f:textbox name="url" value="${serv.getUrl()}"/>
+            <f:textbox name="url" value="${serv.getUrl()}" checkUrl="'${rootURL}/plugin/build-publisher/checkHudsonUrl?value='+encode(this.value)"/>
           </f:entry>
 
 
