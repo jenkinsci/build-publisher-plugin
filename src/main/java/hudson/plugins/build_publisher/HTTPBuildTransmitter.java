@@ -113,10 +113,17 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
     /* Follows redirects, authenticates if necessary. */
     static int executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws IOException {
-        int statusCode = followRedirects(method, hudsonInstance);
+        int statusCode;
 
-        if ((statusCode >= 401) && (statusCode <= 404)) {
-            // Authentication failed, let's try FORM method
+        if (hudsonInstance.requiresAuthentication()) {
+            // We need to get authenticated.
+            // On some containers and depending on the security configuration,
+            // simply sending HTTP BASIC auth would work, but in legacy authentication
+            // with some containers in particular, the behavior tends to be
+            // different.
+            // So while lengthy, let's emulate the user behavior when
+            // they clock the login link, which is most stable across different
+            // environment
             GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
                     + "loginEntry");
             statusCode = followRedirects(loginMethod, hudsonInstance);
@@ -130,10 +137,9 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                     .getPassword());
             credentialsMethod.addParameter("action", "login");
             statusCode = followRedirects(credentialsMethod, hudsonInstance);
-            // another attempt
-            statusCode = followRedirects(method, hudsonInstance);
         }
 
+        statusCode = followRedirects(method, hudsonInstance);
         return statusCode;
     }
 

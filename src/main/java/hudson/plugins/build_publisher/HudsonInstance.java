@@ -4,6 +4,7 @@
 package hudson.plugins.build_publisher;
 
 import hudson.XmlFile;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
@@ -56,6 +57,10 @@ public final class HudsonInstance {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean requiresAuthentication() {
+        return Util.fixEmpty(login)!=null;
     }
 
     public HudsonInstance(String name, String url, String login, String password) {
