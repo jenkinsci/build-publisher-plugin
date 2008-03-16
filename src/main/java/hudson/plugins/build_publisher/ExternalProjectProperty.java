@@ -91,6 +91,14 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             throws IOException {
         acceptChildProject(req, rsp, project, "modules");
     }
+     
+    /**
+     * Accepts MatrixConfiguration
+     */
+    public void doAcceptMatrixConfiguration(StaplerRequest req, StaplerResponse rsp)
+            throws IOException {
+        acceptChildProject(req, rsp, project, "configurations");
+    }
     
     /**
      * Accepts nested project (like maven module or matrix configuration).
