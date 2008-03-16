@@ -89,10 +89,19 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
      */
     public void doAcceptMavenModule(StaplerRequest req, StaplerResponse rsp)
             throws IOException {
+        acceptChildProject(req, rsp, project, "modules");
+    }
+    
+    /**
+     * Accepts nested project (like maven module or matrix configuration).
+     */
+    private static void acceptChildProject(StaplerRequest req, StaplerResponse rsp,
+            AbstractProject project, String subDir)
+            throws IOException {
         project.checkPermission(Permission.CONFIGURE);
 
         String name = req.getParameter("name").trim();
-        File modulesDir = new File(project.getRootDir(), "modules");
+        File modulesDir = new File(project.getRootDir(), subDir);
         File moduleDir = new File(modulesDir, name);
         moduleDir.mkdirs();
         File configFile = new File(moduleDir, "config.xml");
@@ -108,7 +117,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             }
 
         } catch (IOException e) {
-            LOGGER.severe("Failed to accept remote maven module " + name
+            LOGGER.severe("Failed to accept child project " + name
                     + " for " + project.getName() + e.getMessage());
 
             // This is questionable
