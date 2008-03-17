@@ -1,5 +1,6 @@
 package hudson.plugins.build_publisher;
 
+import hudson.Util;
 import hudson.XmlFile;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
@@ -87,13 +88,14 @@ public class PublisherThread extends Thread {
                                     " couldn't be published: Parent project " +
                                     project.getParent().getFullName() + 
                                     " doesn't exist on the remote instance.");
-                            StatusAction.setBuildStatusAction(currentRequest,
-                                new StatusInfo(StatusInfo.State.INTERRUPTED,
-                                    "The parent project doesn't exist on the remote instance." +
-                                    " Please create it (e.g. by publishing parent matrix build) and try again.", 
-                                    hudsonInstance.getName(), null));
                             //Since user has to fix the problem first, it makes no sense to add the requeust to the queue immediately
-                            continue;
+                            hudsonInstance.removeRequest(
+                                    currentRequest,
+                                    new StatusInfo(StatusInfo.State.INTERRUPTED,
+                                    "The parent project doesn't exist on the remote instance." +
+                                    " Please create it (e.g. by publishing parent matrix build) and try again.",
+                                    hudsonInstance.getName(), null)); 
+                            
                         }
                     } else {
                         synchronizeProjectSettings(publicHudsonUrl,project);
