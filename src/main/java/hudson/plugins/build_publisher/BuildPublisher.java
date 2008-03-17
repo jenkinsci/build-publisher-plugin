@@ -1,6 +1,9 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -19,7 +22,7 @@ import java.util.Map;
  * @author dvrzalik@redhat.com
  *
  */
-public class BuildPublisher extends Publisher {
+public class BuildPublisher extends Publisher implements MatrixAggregatable {
 
     private String serverName;
     private String notificationRecipients;
@@ -38,7 +41,7 @@ public class BuildPublisher extends Publisher {
             return true;
         }
         
-        //It won't work for matrix project
+        //MatrixRun can be published only after its parent build
         if(build instanceof MatrixRun) {
             return true;
         }
@@ -61,6 +64,23 @@ public class BuildPublisher extends Publisher {
         publicHudsonInstance.publishNewBuild(build);
 
         return true;
+    }
+    
+    public MatrixAggregator createAggregator(final MatrixBuild matrixBuild, Launcher launcher, BuildListener listener) {
+        
+        // Publishing of a matrix project is a little bit tricky. When MatrixRun is published, 
+        // parent MatrixProject has to be already created on the public side. Since MatrixRuns 
+        // run independently (~ danger of collision) and it would be difficult to make the creation 
+        // operation atomic, only MatrixBuilds are allowed to do it.
+         
+        return new MatrixAggregator(matrixBuild, launcher, listener) {
+
+            @Override
+            public boolean endBuild() throws InterruptedException, IOException {
+                return perform(matrixBuild, launcher, listener);
+            }
+            
+        };
     }
 
     /*---------------------------------*/
