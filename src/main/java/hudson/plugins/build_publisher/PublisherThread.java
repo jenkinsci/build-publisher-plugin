@@ -19,6 +19,7 @@ import hudson.model.StreamBuildListener;
 import hudson.tasks.Publisher;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.dom4j.Document;
@@ -322,11 +323,7 @@ public class PublisherThread extends Thread {
         method.setRequestEntity(new StringRequestEntity(configXML, "text/xml",
                 "utf-8"));
 
-        int responseCode = executeMethod(method);
-        if (responseCode >= 400) {
-            throw new HttpException(submitConfigUrl
-                    + ": Server responded with status " + responseCode);
-        }
+        executeMethod(method);
     }
 
     private void assertUrlExists(String url) throws IOException {
@@ -399,23 +396,21 @@ public class PublisherThread extends Thread {
     private boolean urlExists(String url) throws IOException {
 
         PostMethod method = new PostMethod();
-        method.setURI(new org.apache.commons.httpclient.URI(url,
-                                false));
-        int statusCode = executeMethod(method);
-        method.releaseConnection();
-        if (statusCode < 300) {
+        method.setURI(new org.apache.commons.httpclient.URI(url,false));
+
+        try {
+            executeMethod(method);
             return true;
-        } else if ((statusCode == 400) || (statusCode == 404)) {
-            return false;
-        } else {
-            throw new HttpException(method.getURI() + ": server responded with status "
-                    + statusCode + "\n" + method.getStatusLine());
+        } catch (ServerFailureException e) {
+            int statusCode = e.getMethod().getStatusCode();
+            if ((statusCode == 400) || (statusCode == 404))
+                return false;
+            throw e;
         }
     }
 
     /* shortcut */
-    private int executeMethod(HttpMethodBase method) throws IOException {
-
+    private HttpMethod executeMethod(HttpMethodBase method) throws IOException {
         return HTTPBuildTransmitter.executeMethod(method, this.hudsonInstance);
     }
 

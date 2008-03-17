@@ -8,8 +8,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -73,12 +73,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             method.setRequestEntity(new FileRequestEntity(tempFile,
                     "application/x-tar"));
 
-            int responseCode = executeMethod(method, hudsonInstance);
-            if (responseCode >= 400) {
-                // transmission probably failed. Let's notify sender
-                throw new HttpException(method.getURI()
-                        + ": Server responded with status " + responseCode);
-            }
+            executeMethod(method, hudsonInstance);
         } catch (IOException e) {
             // May be caused by premature call of HttpMethod.abort()
             if (!aborted) {
@@ -106,11 +101,25 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         }
     }
 
-    /* Follows redirects, authenticates if necessary. */
-    static int executeMethod(HttpMethodBase method,
+    /**
+     * Executes the given method, with authenticates if necessary,
+     * and follow any redirects.
+     *
+     * @return
+     *      Final {@link HttpMethod} that successfully executed,
+     *      after possible redirects. The status code of this is always &lt;300 because
+     *      this method handles redirection and errors are thrown as exceptions.
+     *
+     *      <p>
+     *      The return value is useful if the caller wants to read the response.
+     *
+     * @throws ServerFailureException
+     *      If we encounter >400 error code from the server.
+     * @throws IOException
+     *      Other generic communication exception.
+     */
+    static HttpMethod executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws IOException {
-        int statusCode;
-
         if (hudsonInstance.requiresAuthentication()) {
             // We need to get authenticated.
             // On some containers and depending on the security configuration,
@@ -122,7 +131,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             // environment
             GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
                     + "loginEntry");
-            statusCode = followRedirects(loginMethod, hudsonInstance);
+            followRedirects(loginMethod, hudsonInstance);
 
             PostMethod credentialsMethod = new PostMethod(hudsonInstance
                     .getUrl()
@@ -132,14 +141,14 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             credentialsMethod.addParameter("j_password", hudsonInstance
                     .getPassword());
             credentialsMethod.addParameter("action", "login");
-            statusCode = followRedirects(credentialsMethod, hudsonInstance);
+            followRedirects(credentialsMethod, hudsonInstance);
         }
 
-        statusCode = followRedirects(method, hudsonInstance);
-        return statusCode;
+        return followRedirects(method, hudsonInstance);
     }
 
-    private static int followRedirects(HttpMethodBase method,
+    // see executeMethod for contracts
+    private static HttpMethod followRedirects(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws IOException {
         int statusCode;
         HttpClient client = hudsonInstance.getHttpClient();
@@ -149,18 +158,20 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             method.releaseConnection();
         }
 
-        if ((statusCode >= 300) && (statusCode < 400)) {
+        if(statusCode<300)
+            return method;
+        if(statusCode<400) {
             Header locationHeader = method.getResponseHeader("location");
             if (locationHeader != null) {
                 String redirectLocation = locationHeader.getValue();
-                method
-                        .setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
+                method.setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
                                 true));
-                statusCode = followRedirects(method, hudsonInstance);
+                return followRedirects(method, hudsonInstance);
             }
         }
 
-        return statusCode;
+        // failure
+        throw new ServerFailureException(method);
     }
 
     /**
