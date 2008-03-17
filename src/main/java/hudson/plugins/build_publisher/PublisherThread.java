@@ -1,6 +1,5 @@
 package hudson.plugins.build_publisher;
 
-import hudson.Util;
 import hudson.XmlFile;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
@@ -18,8 +17,8 @@ import hudson.model.Project;
 import hudson.model.StreamBuildListener;
 import hudson.tasks.Publisher;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.dom4j.Document;
@@ -146,9 +145,13 @@ public class PublisherThread extends Thread {
                                             .getName(), e));
                     hudsonInstance.postponeRequest(currentRequest);
 
+                    HttpMethod httpMethod = null;
+                    if (e instanceof ServerFailureException)
+                        httpMethod = ((ServerFailureException) e).getMethod();
+                    
                     // TODO make this configurable
                     final long timeout = System.currentTimeMillis() + 1000*60*10;
-                    state = new ThreadState.ErrorRecoveryWait(timeout,currentRequest,e);
+                    state = new ThreadState.ErrorRecoveryWait(timeout,currentRequest,e,httpMethod);
 
                     try {
                         while(System.currentTimeMillis() < timeout)

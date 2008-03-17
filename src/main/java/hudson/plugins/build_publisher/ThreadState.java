@@ -6,6 +6,8 @@ import hudson.model.AbstractBuild;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.apache.commons.httpclient.HttpMethod;
+
 /**
  * The current state of {@link PublisherThread}.
  *
@@ -45,10 +47,16 @@ public abstract class ThreadState {
          */
         public final AbstractBuild build;
 
-        /*package*/ ErrorRecoveryWait(long timeout,AbstractBuild build,Throwable cause) {
+        /**
+         * Failed {@link HttpMethod}, if the failure was due to an error on the server. Possibly null.
+         */
+        public final HttpMethod method;
+
+        /*package*/ ErrorRecoveryWait(long timeout,AbstractBuild build,Throwable cause, HttpMethod method) {
             this.timeout = timeout;
             this.build = build;
             this.cause = cause;
+            this.method = method;
         }
 
         public String getTimeoutString() {
