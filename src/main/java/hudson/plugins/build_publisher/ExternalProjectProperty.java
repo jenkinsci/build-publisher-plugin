@@ -5,6 +5,7 @@ import hudson.XmlFile;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
@@ -122,6 +123,12 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
                 Util.copyStream(req.getInputStream(), fos);
 
                 project.onLoad(project.getParent(), project.getName());
+                
+                //Add this property to the child project, otherwise it won't be able to recieve builds
+                Job item = (Job) ((ItemGroup) project).getItem(name);
+                if(item.getProperty(ExternalProjectProperty.class) == null) {
+                    item.addProperty(new ExternalProjectProperty());       
+                }
             } finally {
                 fos.close();
             }
