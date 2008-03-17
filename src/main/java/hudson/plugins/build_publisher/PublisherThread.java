@@ -297,7 +297,7 @@ public class PublisherThread extends Thread {
 
         String projectURL = publicHudson + "job/" + project.getName();
         System.out.println("Project url:"+projectURL);
-        String submitConfigUrl = null;
+        String submitConfigUrl;
 
         if (!urlExists(projectURL)) {
             // if the project doesn't exist, create it
