@@ -28,9 +28,10 @@ public class ServerFailureException extends IOException {
         this.method = method;
     }
 
-    public ServerFailureException(HttpMethod method) throws URIException {
+    public ServerFailureException(HttpMethod method) throws IOException {
         this(method,method.getURI()+" responded with status "+method.getStatusCode(),null);
-
+        // make sure we get the response body captured
+        method.getResponseBodyAsString();
     }
 
     public HttpMethod getMethod() {

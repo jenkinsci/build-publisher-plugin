@@ -55,6 +55,11 @@ public class PluginImpl extends Plugin {
         return BuildPublisher.DESCRIPTOR.getPublicInstances();
     }
 
+    // bind HudsonInstance to Jelly views
+    public HudsonInstance getInstance(int n) {
+        return getHudsonInstances()[n];
+    }
+
     public void doRetryNow(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
         Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
 

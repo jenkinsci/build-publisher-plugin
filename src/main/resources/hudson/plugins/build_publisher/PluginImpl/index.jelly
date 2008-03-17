@@ -4,7 +4,7 @@
     <l:main-panel>
       <h1>${%Build Publisher Status}</h1>
 
-      <j:forEach var="h" items="${it.hudsonInstances}">
+      <j:forEach var="h" items="${it.hudsonInstances}" varStatus="loop">
         <h2>${h.name} (<a href="${h.url}">${h.url}</a>)</h2>
         <j:set var="q" value="${h.queue}"/>
         <j:choose>

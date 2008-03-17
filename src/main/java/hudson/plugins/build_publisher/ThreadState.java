@@ -5,8 +5,14 @@ import hudson.model.AbstractBuild;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.Header;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * The current state of {@link PublisherThread}.
@@ -65,6 +71,22 @@ public abstract class ThreadState {
 
         public String getStackTrace() {
             return printStackTrace(cause);
+        }
+
+        /**
+         * Dumps the server output.
+         */
+        public void doOutput(StaplerRequest req, StaplerResponse rsp) throws IOException {
+            if(method==null)
+                rsp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            else {
+                Header ct = method.getResponseHeader("Content-type");
+                if(ct!=null)
+                    rsp.setContentType(ct.getValue());
+                else
+                    rsp.setContentType("text/plain;charset=UTF-8");
+                rsp.getWriter().write(method.getResponseBodyAsString());
+            }
         }
     }
 

@@ -154,24 +154,24 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         HttpClient client = hudsonInstance.getHttpClient();
         try {
             statusCode = client.executeMethod(method);
+
+            if(statusCode<300)
+                return method;
+            if(statusCode<400) {
+                Header locationHeader = method.getResponseHeader("location");
+                if (locationHeader != null) {
+                    String redirectLocation = locationHeader.getValue();
+                    method.setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
+                                    true));
+                    return followRedirects(method, hudsonInstance);
+                }
+            }
+
+            // failure
+            throw new ServerFailureException(method);
         } finally {
             method.releaseConnection();
         }
-
-        if(statusCode<300)
-            return method;
-        if(statusCode<400) {
-            Header locationHeader = method.getResponseHeader("location");
-            if (locationHeader != null) {
-                String redirectLocation = locationHeader.getValue();
-                method.setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
-                                true));
-                return followRedirects(method, hudsonInstance);
-            }
-        }
-
-        // failure
-        throw new ServerFailureException(method);
     }
 
     /**
