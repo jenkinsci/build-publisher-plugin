@@ -337,65 +337,7 @@ public class PublisherThread extends Thread {
         }
     }
 
-    /* Project config changes */
-    private String updateProjectXml(AbstractProject project) throws IOException {
-        XmlFile xmlFile = project.getConfigFile();
-        SAXReader reader = new SAXReader();
-        Document document;
-        try {
-            document = reader.read(xmlFile.getFile());
-            Element root = document.getRootElement();
-
-            // We don't want notifications to be sent twice
-            Node mailerNode = document
-                    .selectSingleNode("//publishers/hudson.tasks.Mailer");
-            if (mailerNode != null) {
-                mailerNode.detach();
-            } else {
-                mailerNode = document
-                        .selectSingleNode("//reporters/hudson.maven.reporters.MavenMailer");
-                if (mailerNode != null) {
-                    mailerNode.detach();
-                }
-            }
-
-            Node reporterNode = document
-                    .selectSingleNode("//publishers/hudson.plugins.build__publisher.MavenBuildPublisher");
-            if (reporterNode != null) {
-                reporterNode.detach();
-            } else {
-                Node publisherNode = document
-                        .selectSingleNode("//publishers/hudson.plugins.build__publisher.BuildPublisher");
-                if (publisherNode != null) {
-                    publisherNode.detach();
-                }
-            }
-
-            // add capability to accept incoming builds
-            Node property = document
-                    .selectSingleNode("//properties/hudson.plugins.build_publisher.ExternalProjectProperty");
-            if (property == null) {
-                Element properties = root.element("properties");
-                if (properties == null) {
-                    properties = new DefaultElement("properties");
-                    root.add(properties);
-                }
-                properties
-                        .addElement("hudson.plugins.build_publisher.ExternalProjectProperty");
-            }
-
-            // remove triggers
-            Element triggers = root.element("triggers");
-            if (triggers != null) {
-                triggers.detach();
-            }
-
-            return document.asXML();
-
-        } catch (DocumentException e) {
-            return xmlFile.asString();
-        }
-    }
+    
 
     private boolean urlExists(String url) throws IOException {
 
