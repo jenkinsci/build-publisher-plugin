@@ -29,7 +29,6 @@ public class PluginImpl extends Plugin {
         // plugins normally extend Hudson by providing custom implementations
         // of 'extension points'. In this example, we'll add one builder.
         BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
-        Jobs.PROPERTIES.add(ExternalProjectProperty.DESCRIPTOR);
 
         ManagementLink.LIST.add(new ManagementLink() {
             public String getIconFileName() {
