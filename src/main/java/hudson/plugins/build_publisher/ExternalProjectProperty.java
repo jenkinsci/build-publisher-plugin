@@ -59,6 +59,8 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
     /**
      * Updates projects from submitted config.xml
+     *
+     * TODO: use POST to config.xml, which is new in Hudson 1.197 at some point 
      */
     public void doAcceptConfig(StaplerRequest req, StaplerResponse rsp)
             throws IOException {
