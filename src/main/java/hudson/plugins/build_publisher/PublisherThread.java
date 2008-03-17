@@ -1,6 +1,10 @@
 package hudson.plugins.build_publisher;
 
 import hudson.XmlFile;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
@@ -65,8 +69,36 @@ public class PublisherThread extends Thread {
 
                 try {
                     // Proceed transmission
-                    synchronizeProjectSettings(hudsonInstance.getUrl(),
-                            currentRequest.getProject());
+                    
+                    String publicHudsonUrl = hudsonInstance.getUrl();
+                    AbstractProject project  = currentRequest.getProject();
+                    
+                    if (project instanceof MatrixConfiguration) {
+                        //We can't create remote parent project here (we might collide with another MatrixRun),
+                        //just check if it exists...
+                        String projectURL = publicHudsonUrl + 
+                                "job/" + 
+                                ((MatrixConfiguration) project).getParent().getName();
+                        if (!urlExists(projectURL)) {
+                            //...If not, stop here
+                            HudsonInstance.LOGGER.log(Level.WARNING,
+                                    "Build " + currentRequest.getNumber() +
+                                    " of matrix configuration "+ project.getName() +
+                                    " couldn't be published: Parent project " +
+                                    project.getParent().getFullName() + 
+                                    " doesn't exist on the remote instance.");
+                            StatusAction.setBuildStatusAction(currentRequest,
+                                new StatusInfo(StatusInfo.State.INTERRUPTED,
+                                    "The parent project doesn't exist on the remote instance." +
+                                    " Please create it (e.g. by publishing parent matrix build) and try again.", 
+                                    hudsonInstance.getName(), null));
+                            //Since user has to fix the problem first, it makes no sense to add the requeust to the queue immediately
+                            continue;
+                        }
+                    } else {
+                        synchronizeProjectSettings(publicHudsonUrl,project);
+                    }
+                    
                     hudsonInstance.buildTransmitter.sendBuild(currentRequest,
                             hudsonInstance);
                     
@@ -78,12 +110,20 @@ public class PublisherThread extends Thread {
                                     hudsonInstance);
                         }
                     } 
+                    //.. and all matrix runs as well
+                    else if(currentRequest instanceof MatrixBuild)  {
+                        for(MatrixRun run: ((MatrixBuild) currentRequest).getRuns()) {
+                            hudsonInstance.publishNewBuild(run);
+                        }
+                    }
+                    
+                    
                  
                     sendMailNotification(currentRequest);
                     // Notify about success
                     HudsonInstance.LOGGER.info("Build #"
                             + currentRequest.getNumber() + " of project "
-                            + currentRequest.getProject().getDisplayName()
+                            + currentRequest.getProject().getName()
                             + " was published.");
 
                     hudsonInstance
@@ -213,19 +253,19 @@ public class PublisherThread extends Thread {
 
     /**
      * Creates new project on the public server in case it doesn't already exist
-     * and submits local config.xml.
+     * and submit local config.xml.
      */
     private void synchronizeProjectSettings(String publicHudson,
             AbstractProject project) throws IOException {
 
         assertUrlExists(publicHudson);
         createOrSynchronize(publicHudson, project);
-        
+                
         if (project instanceof MavenModuleSet) {
             //if this is main maven project, synchronize also its modules
             String parentURL = publicHudson + "job/" + project.getName();
             
-            for(MavenModule module: ((MavenModuleSet) project).getModules()) {
+            for(MavenModule module: ((MavenModuleSet) project).getItems()) {
                 String moduleModuleSystemName = ((MavenModule) module)
                     .getModuleName().toFileSystemName();
                 
@@ -234,7 +274,20 @@ public class PublisherThread extends Thread {
                         + moduleModuleSystemName, module);
                 }
             }
-        } 
+        } else if (project instanceof MatrixProject) {
+            //Find three differences :)
+            String parentURL = publicHudson + "job/" + project.getName();
+            
+            for(MatrixConfiguration configuration: ((MatrixProject) project).getItems()) {
+                String configurationName = ((MatrixConfiguration) configuration)
+                    .getCombination().toString();
+                
+                if (!urlExists(parentURL + "/" + configurationName)) {
+                    submitConfig(parentURL + "/postBuild/acceptMatrixConfiguration?name="
+                        + configurationName, configuration);
+                }
+            }
+        }
     }
 
     private void createOrSynchronize(String publicHudson,
