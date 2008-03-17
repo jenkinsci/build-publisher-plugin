@@ -64,7 +64,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         publicHudsonInstance.publishNewBuild(build);
 
         return true;
-    }
+    }  
     
     public MatrixAggregator createAggregator(final MatrixBuild matrixBuild, Launcher launcher, BuildListener listener) {
         
@@ -104,6 +104,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
             load();
         }
 
+        @Override
         protected void convert(Map<String, Object> oldPropertyBag) {
             if (oldPropertyBag.containsKey("publicInstances"))
                 publicInstances = (HudsonInstance[]) oldPropertyBag
