@@ -3,6 +3,7 @@ package hudson.plugins.build_publisher;
 import hudson.Util;
 import hudson.XmlFile;
 import hudson.maven.MavenModule;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.ItemGroup;
@@ -29,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -124,11 +126,6 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
                 project.onLoad(project.getParent(), project.getName());
                 
-                //Add this property to the child project, otherwise it won't be able to recieve builds
-                Job item = (Job) ((ItemGroup) project).getItem(name);
-                if(item.getProperty(ExternalProjectProperty.class) == null) {
-                    item.addProperty(new ExternalProjectProperty());       
-                }
             } finally {
                 fos.close();
             }
@@ -274,7 +271,8 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
         @Override
         public boolean isApplicable(Class<? extends Job> jobType) {
-            return true;
+            //This property shall be added only programmaticaly
+            return false;
         }
 
         @Override
@@ -284,9 +282,32 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
         @Override
         public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new ExternalProjectProperty();
+            return null;
         }
 
+    }
+    
+    /**
+     * Checks if the given project already has this property and posibly adds it (recursive for ItemGroups).
+     */
+    public static void applyToProject(Job job) throws IOException {
+        if(job instanceof ItemGroup) {
+            for(Object item: ((ItemGroup) job).getItems()) {
+                applyToProject((Job /*too optimistic assumption?*/) item);
+            }
+        }
+        
+        //Could not use getProperty(...) 
+        Iterator<JobProperty> iter = job.getProperties().values().iterator();
+        while(iter.hasNext()) {
+            JobProperty prop = iter.next();
+            //hem... >:-|
+            if(prop.getClass().getName().equals("hudson.plugins.build_publisher.ExternalProjectProperty")) {
+                return;
+            }
+        }
+        
+        job.addProperty(new ExternalProjectProperty());
     }
 
     public String getDisplayName() {

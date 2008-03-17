@@ -1,5 +1,6 @@
 package hudson.plugins.build_publisher;
 
+import hudson.Util;
 import hudson.XmlFile;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
@@ -265,6 +266,7 @@ public class PublisherThread extends Thread {
             AbstractProject project) throws IOException {
 
         assertUrlExists(publicHudson);
+        ExternalProjectProperty.applyToProject(project);
         createOrSynchronize(publicHudson, project);
                 
         if (project instanceof MavenModuleSet) {
@@ -288,10 +290,10 @@ public class PublisherThread extends Thread {
                 String configurationName = configuration
                     .getCombination().toString();
                 
-                if (!urlExists(parentURL + "/" + configurationName)) {
+                //if (!urlExists(parentURL + "/" + configurationName)) {
                     submitConfig(parentURL + "/postBuild/acceptMatrixConfiguration?name="
                         + configurationName, configuration);
-                }
+                //}
             }
         }
     }
@@ -318,8 +320,7 @@ public class PublisherThread extends Thread {
     private void submitConfig(String submitConfigUrl, AbstractProject project)
             throws IOException {
 
-        String configXML = updateProjectXml(project);
-//        String encodedURL = HTTPBuildTransmitter.encodeURI(submitConfigUrl);
+        String configXML = Util.loadFile(project.getConfigFile().getFile());
         PostMethod method = new PostMethod();
         method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
                                 false));
