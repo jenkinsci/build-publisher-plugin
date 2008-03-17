@@ -268,7 +268,7 @@ public class PublisherThread extends Thread {
             String parentURL = publicHudson + "job/" + project.getName();
             
             for(MavenModule module: ((MavenModuleSet) project).getItems()) {
-                String moduleModuleSystemName = ((MavenModule) module)
+                String moduleModuleSystemName = module
                     .getModuleName().toFileSystemName();
                 
                 if (!urlExists(parentURL + "/" + moduleModuleSystemName)) {
@@ -281,7 +281,7 @@ public class PublisherThread extends Thread {
             String parentURL = publicHudson + "job/" + project.getName();
             
             for(MatrixConfiguration configuration: ((MatrixProject) project).getItems()) {
-                String configurationName = ((MatrixConfiguration) configuration)
+                String configurationName = configuration
                     .getCombination().toString();
                 
                 if (!urlExists(parentURL + "/" + configurationName)) {
