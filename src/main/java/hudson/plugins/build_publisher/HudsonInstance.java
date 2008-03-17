@@ -186,7 +186,7 @@ public final class HudsonInstance {
     /**
      * Obtains the current queue of builds that are waiting for publication.
      */
-    synchronized List<AbstractBuild> getQueue() {
+    public synchronized List<AbstractBuild> getQueue() {
         return new ArrayList<AbstractBuild>(publishRequestQueue);
     }
 
