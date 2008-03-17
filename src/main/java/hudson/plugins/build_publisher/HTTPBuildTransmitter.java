@@ -2,6 +2,7 @@ package hudson.plugins.build_publisher;
 
 import hudson.Functions;
 import hudson.Util;
+import hudson.matrix.MatrixConfiguration;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -51,6 +52,10 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                     + "/"
                     + ((MavenModule) project).getModuleName()
                             .toFileSystemName();
+        } else if (project instanceof MatrixConfiguration) {
+            jobUrl += ((MatrixConfiguration)project).getParent().getName()
+                    + "/"
+                    + ((MatrixConfiguration)project).getCombination().toString();
         } else {
             jobUrl += project.getName();
         }
