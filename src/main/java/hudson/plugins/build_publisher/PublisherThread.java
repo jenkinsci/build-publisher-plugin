@@ -225,40 +225,6 @@ public class PublisherThread extends Thread {
     }
 
     /**
-     * Cancels the transmission of the given build.
-     * If the build is being transmitted, a cancellation is attempted.
-     */
-    
-    /* 
-    public void abortTrasmission(AbstractBuild request) {
-        // FIXME: this is broken in so many levels
-        // first the synchronization is wrong, and
-        // then request==null check is wrong, because currentRequest can be null,
-        // in which case it would cause NPE.
-        // And then, there's no guarantee that a buildTransmitter is doing the work when
-        // this method is invoked, so the cancellation could fail to cancel.
-        //
-        // in general, I don't think it's possible to cleanly cancel a transmission that's in progress.
-        // the best you can do is to interrupt the thread and hope the thread would take notice.
-        // -KK
-      
-        // I still believe it is possible. Anyway, let's disable it for now. - DV
-     
-            
-        HudsonInstance.LOGGER.info("Publishing of Build #"
-                + currentRequest.getNumber() + " of project "
-                + currentRequest.getProject().getDisplayName()
-                + " was canceled.");
-        hudsonInstance.buildTransmitter.abortTransmission();
-
-        hudsonInstance.removeRequest(request, new StatusInfo(
-                StatusInfo.State.INTERRUPTED,
-                "Build transmission was aborted by user", hudsonInstance
-                        .getName(), null));
-     
-    }*/
-
-    /**
      * Creates new project on the public server in case it doesn't already exist
      * and submit local config.xml.
      */
@@ -311,7 +277,7 @@ public class PublisherThread extends Thread {
                     + project.getName();
         } else {
             // otherwise just synchronize config file
-            submitConfigUrl = projectURL + "/postBuild/acceptConfig";
+            submitConfigUrl = projectURL + "/config.xml";
         }
 
         submitConfig(submitConfigUrl, project);
