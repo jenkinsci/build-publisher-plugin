@@ -243,10 +243,8 @@ public class PublisherThread extends Thread {
                 String moduleModuleSystemName = module
                     .getModuleName().toFileSystemName();
                 
-                if (!urlExists(parentURL + "/" + moduleModuleSystemName)) {
-                    submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
+                submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
                         + moduleModuleSystemName, module);
-                }
             }
         } else if (project instanceof MatrixProject) {
             //Find three differences :)
@@ -255,11 +253,9 @@ public class PublisherThread extends Thread {
             for(MatrixConfiguration configuration: ((MatrixProject) project).getItems()) {
                 String configurationName = configuration
                     .getCombination().toString();
-                
-                //if (!urlExists(parentURL + "/" + configurationName)) {
-                    submitConfig(parentURL + "/postBuild/acceptMatrixConfiguration?name="
+               
+                submitConfig(parentURL + "/postBuild/acceptMatrixConfiguration?name="
                         + configurationName, configuration);
-                //}
             }
         }
     }
