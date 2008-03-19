@@ -1,19 +1,16 @@
 package hudson.plugins.build_publisher;
 
-import hudson.Util;
-import hudson.XmlFile;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
-import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
 import hudson.maven.MavenBuild;
-import hudson.maven.MavenModule;
-import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.maven.MavenReporter;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
+import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Project;
 import hudson.model.StreamBuildListener;
 import hudson.tasks.Publisher;
@@ -229,27 +226,16 @@ public class PublisherThread extends Thread {
         ExternalProjectProperty.applyToProject(project);
         createOrSynchronize(publicHudson, project);
                 
-        if (project instanceof MavenModuleSet) {
-            //if this is main maven project, synchronize also its modules
+        //FIXME: submitting to /config.xml doesn't work for MavenModules!!!!!!!!!!!!!
+        if(project instanceof ItemGroup) {
             String parentURL = publicHudson + "job/" + project.getName();
-            
-            for(MavenModule module: ((MavenModuleSet) project).getItems()) {
-                String moduleModuleSystemName = module
-                    .getModuleName().toFileSystemName();
+            for(Object item: ((ItemGroup) project).getItems()) {
+                if(item instanceof Job) {
+                    Job job = (Job) item;
+                    submitConfig(parentURL+"/"+job.getShortUrl() +"config.xml", job);
+                    
+                }
                 
-                submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
-                        + moduleModuleSystemName, module);
-            }
-        } else if (project instanceof MatrixProject) {
-            //Find three differences :)
-            String parentURL = publicHudson + "job/" + project.getName();
-            
-            for(MatrixConfiguration configuration: ((MatrixProject) project).getItems()) {
-                String configurationName = configuration
-                    .getCombination().toString();
-               
-                submitConfig(parentURL + "/postBuild/acceptMatrixConfiguration?name="
-                        + configurationName, configuration);
             }
         }
     }
@@ -273,7 +259,7 @@ public class PublisherThread extends Thread {
         submitConfig(submitConfigUrl, project);
     }
 
-    private void submitConfig(String submitConfigUrl, AbstractProject project)
+    private void submitConfig(String submitConfigUrl, Job project)
             throws IOException {
         PostMethod method = new PostMethod();
         method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
