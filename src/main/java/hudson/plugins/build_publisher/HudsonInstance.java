@@ -14,7 +14,7 @@ import hudson.model.listeners.ItemListener;
 import hudson.plugins.build_publisher.StatusInfo.State;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 
@@ -131,7 +131,7 @@ public final class HudsonInstance {
     private void initVariables() {
         publishRequestQueue = new LinkedHashSet<AbstractBuild>();
         buildTransmitter = new HTTPBuildTransmitter();
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        SimpleHttpConnectionManager connectionManager = new SimpleHttpConnectionManager();
         client = new HttpClient(connectionManager);
         
         // --- authentication
