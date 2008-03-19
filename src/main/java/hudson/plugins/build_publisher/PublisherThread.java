@@ -20,14 +20,8 @@ import hudson.tasks.Publisher;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -281,14 +275,10 @@ public class PublisherThread extends Thread {
 
     private void submitConfig(String submitConfigUrl, AbstractProject project)
             throws IOException {
-
-        String configXML = Util.loadFile(project.getConfigFile().getFile());
         PostMethod method = new PostMethod();
         method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
                                 false));
-        method.setRequestEntity(new StringRequestEntity(configXML, "text/xml",
-                "utf-8"));
-
+        method.setRequestEntity(new FileRequestEntity(project.getConfigFile().getFile(),"text/xml"));
         executeMethod(method);
     }
 
