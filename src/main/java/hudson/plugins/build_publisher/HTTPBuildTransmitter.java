@@ -120,7 +120,8 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
      */
     static HttpMethod executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws IOException {
-        if (hudsonInstance.requiresAuthentication()) {
+        hudsonInstance.getHttpClient().getState().clear();
+        if ((hudsonInstance.requiresAuthentication())) {
             // We need to get authenticated.
             // On some containers and depending on the security configuration,
             // simply sending HTTP BASIC auth would work, but in legacy authentication
