@@ -61,34 +61,6 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
     }
 
     /**
-     * Updates projects from submitted config.xml
-     *
-     * TODO: use POST to config.xml, which is new in Hudson 1.197 at some point 
-     */
-    public void doAcceptConfig(StaplerRequest req, StaplerResponse rsp)
-            throws IOException {
-        project.checkPermission(Permission.CONFIGURE);
-
-        // Partially taken from Hudson.doCreateItem(..)
-        XmlFile configXmlFile = project.getConfigFile();
-        File configXml = configXmlFile.getFile();
-        configXml.getParentFile().mkdirs();
-        FileOutputStream fos = new FileOutputStream(configXml);
-        try {
-            Util.copyStream(req.getInputStream(), fos);
-            project.onLoad(project.getParent(), project.getName());
-            configXmlFile.unmarshal(project);
-        } catch (IOException e) {
-            LOGGER.severe("Failed to accept configuration for "
-                    + project.getName() + e.getMessage());
-            throw e;
-        } finally {
-            fos.close();
-        }
-
-    }
-
-    /**
      * Accepts incoming MavenModule, provided that current project is
      * MavenModuleSet
      */
