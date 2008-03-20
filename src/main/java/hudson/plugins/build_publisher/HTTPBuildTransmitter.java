@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import org.apache.commons.httpclient.HttpException;
 
 /**
  * Sends build result via HTTP protocol.
@@ -74,6 +76,14 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                     "application/x-tar"));
 
             executeMethod(method, hudsonInstance);
+            
+            //Check if remote side really accepted the build
+            Header responseHeader = method.getResponseHeader("X-Build-Recieved");
+            if((responseHeader == null) || 
+                    !project.getName().equals(responseHeader.getValue().trim())) {
+                    throw new HttpException("Remote instance didn't confirm recieving this build");
+            }
+            
         } catch (IOException e) {
             // May be caused by premature call of HttpMethod.abort()
             if (!aborted) {
@@ -85,7 +95,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             }
         } finally {
             if (!tempFile.delete()) {
-                throw new IOException("Failed to delete temporary file "
+                HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to delete temporary file "
                         + tempFile.getAbsolutePath()
                         + ". Please delete the file manually.");
             }

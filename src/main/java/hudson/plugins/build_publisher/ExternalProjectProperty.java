@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Recieves builds submitted remotely via HTTP.
@@ -141,7 +142,8 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             //Update next build number
             int nextBuildNumber = project.getLastBuild().number + 1;
             project.updateNextBuildNumber(nextBuildNumber);            
-
+            //Add confirmation header
+            rsp.addHeader("X-Build-Recieved",project.getName());
             try {
                 tidyUp();
             } catch (IOException e) {
