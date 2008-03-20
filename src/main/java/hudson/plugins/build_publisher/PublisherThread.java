@@ -244,7 +244,6 @@ public class PublisherThread extends Thread {
             AbstractProject project) throws IOException {
 
         String projectURL = publicHudson + "job/" + project.getName();
-        System.out.println("Project url:"+projectURL);
         String submitConfigUrl;
 
         if (!urlExists(projectURL)) {
