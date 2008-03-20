@@ -96,14 +96,6 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             throws IOException {
         acceptChildProject(req, rsp, project, "modules");
     }
-     
-    /**
-     * Accepts MatrixConfiguration
-     */
-    public void doAcceptMatrixConfiguration(StaplerRequest req, StaplerResponse rsp)
-            throws IOException {
-        acceptChildProject(req, rsp, project, "configurations");
-    }
     
     /**
      * Accepts nested project (like maven module or matrix configuration).
@@ -182,7 +174,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             int nextBuildNumber = project.getLastBuild().number + 1;
             TextFile f = new TextFile(new File(project.getRootDir(),
                     "nextBuildNumber"));
-            f.write(String.valueOf(nextBuildNumber));
+            f.write(String.valueOf(nextBuildNumber));//TODO this is already accessible as API??
             // Second reload just because of the build number. :(
             reloadProject(project);
 
