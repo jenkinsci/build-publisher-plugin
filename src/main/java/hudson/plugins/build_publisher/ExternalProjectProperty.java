@@ -1,9 +1,7 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Util;
-import hudson.XmlFile;
 import hudson.maven.MavenModule;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.ItemGroup;
@@ -16,14 +14,12 @@ import hudson.model.Run;
 import hudson.security.Permission;
 import hudson.tasks.ArtifactArchiver;
 import hudson.util.IOException2;
-import hudson.util.TextFile;
 import net.sf.json.JSONObject;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.Untar;
 import org.apache.tools.ant.types.Resource;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -144,11 +140,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             
             //Update next build number
             int nextBuildNumber = project.getLastBuild().number + 1;
-            TextFile f = new TextFile(new File(project.getRootDir(),
-                    "nextBuildNumber"));
-            f.write(String.valueOf(nextBuildNumber));//TODO this is already accessible as API??
-            // Second reload just because of the build number. :(
-            reloadProject(project);
+            project.updateNextBuildNumber(nextBuildNumber);            
 
             try {
                 tidyUp();
