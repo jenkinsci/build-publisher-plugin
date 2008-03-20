@@ -4,6 +4,8 @@ import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixRun;
 import hudson.maven.MavenBuild;
+import hudson.maven.MavenModule;
+import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.maven.MavenReporter;
 import hudson.model.AbstractBuild;
@@ -226,8 +228,20 @@ public class PublisherThread extends Thread {
         ExternalProjectProperty.applyToProject(project);
         createOrSynchronize(publicHudson, project);
                 
-        //FIXME: submitting to /config.xml doesn't work for MavenModules!!!!!!!!!!!!!
-        if(project instanceof ItemGroup) {
+        if (project instanceof MavenModuleSet) {
+            //if this is main maven project, synchronize also its modules
+            String parentURL = publicHudson + "job/" + project.getName();
+            
+            for(MavenModule module: ((MavenModuleSet) project).getItems()) {
+                String moduleModuleSystemName = module
+                    .getModuleName().toFileSystemName();
+                
+                submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
+                        + moduleModuleSystemName, module);
+            }
+        } else if(project instanceof ItemGroup) {
+            //This could work generaly only if all project types contained informations about sub-projects in their main config file - which is not true :-/.
+            //(it means that this is useful only for matrix projects at the moment)
             String parentURL = publicHudson + "job/" + project.getName();
             for(Object item: ((ItemGroup) project).getItems()) {
                 if(item instanceof Job) {
