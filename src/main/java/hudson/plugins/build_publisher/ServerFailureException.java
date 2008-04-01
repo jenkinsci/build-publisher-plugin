@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  * @author Kohsuke Kawaguchi
  */
-public class ServerFailureException extends IOException {
+public class ServerFailureException extends Exception {
     private final HttpMethod method;
 
     public ServerFailureException(HttpMethod method, String message, Throwable cause) {
