@@ -222,7 +222,7 @@ public class PublisherThread extends Thread {
      * and submit local config.xml.
      */
     private void synchronizeProjectSettings(String publicHudson,
-            AbstractProject project) throws IOException {
+            AbstractProject project) throws IOException, ServerFailureException {
 
         assertUrlExists(publicHudson);
         ExternalProjectProperty.applyToProject(project);
@@ -255,7 +255,7 @@ public class PublisherThread extends Thread {
     }
 
     private void createOrSynchronize(String publicHudson,
-            AbstractProject project) throws IOException {
+            AbstractProject project) throws IOException, ServerFailureException {
 
         String projectURL = publicHudson + "job/" + project.getName();
         String submitConfigUrl;
@@ -273,7 +273,7 @@ public class PublisherThread extends Thread {
     }
 
     private void submitConfig(String submitConfigUrl, Job project)
-            throws IOException {
+            throws IOException, ServerFailureException {
         PostMethod method = new PostMethod();
         method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
                                 false));
@@ -281,7 +281,7 @@ public class PublisherThread extends Thread {
         executeMethod(method);
     }
 
-    private void assertUrlExists(String url) throws IOException {
+    private void assertUrlExists(String url) throws IOException, ServerFailureException {
         if (!urlExists(url)) {
             // wrong address, give up
             throw new HttpException(url + ": URL doesn't exist");
@@ -290,7 +290,7 @@ public class PublisherThread extends Thread {
 
     
 
-    private boolean urlExists(String url) throws IOException {
+    private boolean urlExists(String url) throws ServerFailureException, IOException {
 
         PostMethod method = new PostMethod();
         method.setURI(new org.apache.commons.httpclient.URI(url,false));
@@ -307,7 +307,7 @@ public class PublisherThread extends Thread {
     }
 
     /* shortcut */
-    private HttpMethod executeMethod(HttpMethodBase method) throws IOException {
+    private HttpMethod executeMethod(HttpMethodBase method) throws ServerFailureException {
         return HTTPBuildTransmitter.executeMethod(method, this.hudsonInstance);
     }
 

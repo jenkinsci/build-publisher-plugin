@@ -19,7 +19,7 @@ public interface BuildTransmitter {
      * @param hudsonInstance Targetted public hudson
      * @throws java.io.IOException when an error occures
      */
-    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance) throws IOException;
+    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance) throws ServerFailureException;
 
     /**
      * Aborts transmission. (optional?)

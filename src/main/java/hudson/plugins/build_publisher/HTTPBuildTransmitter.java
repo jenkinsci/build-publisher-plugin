@@ -42,7 +42,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
     @Override
     public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance)
-            throws IOException {
+            throws ServerFailureException {
 
         aborted = false;
 
@@ -87,7 +87,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         } catch (IOException e) {
             // May be caused by premature call of HttpMethod.abort()
             if (!aborted) {
-                throw (e);
+                throw new ServerFailureException(method,e);
             }
         } catch (RuntimeException e1) {
             if (!aborted) {
@@ -129,7 +129,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
      *      Other generic communication exception.
      */
     static HttpMethod executeMethod(HttpMethodBase method,
-            HudsonInstance hudsonInstance) throws IOException {
+            HudsonInstance hudsonInstance) throws ServerFailureException {
         hudsonInstance.getHttpClient().getState().clear();
         if ((hudsonInstance.requiresAuthentication())) {
             // We need to get authenticated.
@@ -160,7 +160,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
     // see executeMethod for contracts
     private static HttpMethod followRedirects(HttpMethodBase method,
-            HudsonInstance hudsonInstance) throws IOException {
+            HudsonInstance hudsonInstance) throws ServerFailureException {
         int statusCode;
         HttpClient client = hudsonInstance.getHttpClient();
         try {
@@ -180,6 +180,8 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
             // failure
             throw new ServerFailureException(method);
+        } catch(IOException ioe) {
+            throw new ServerFailureException(method, ioe);
         } finally {
             method.releaseConnection();
         }
