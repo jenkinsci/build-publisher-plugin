@@ -1,7 +1,7 @@
 package hudson.plugins.build_publisher;
 
+import hudson.util.IOException2;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.URIException;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  * @author Kohsuke Kawaguchi
  */
-public class ServerFailureException extends Exception {
+public class ServerFailureException extends IOException2 {
     private final HttpMethod method;
 
     public ServerFailureException(HttpMethod method, String message, Throwable cause) {
