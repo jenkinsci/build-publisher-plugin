@@ -178,42 +178,25 @@ public class PublisherThread extends Thread {
 
     private void sendMailNotification(AbstractBuild request) {
 
-        String recipients = null;
         if (request instanceof Build) {
             Build build = (Build) request;
-            Publisher publisher = ((Project) build.getProject())
-                    .getPublisher(BuildPublisher.DESCRIPTOR);
+            Publisher publisher = ((Project) build.getProject()).getPublisher(BuildPublisher.DESCRIPTOR);
             if (publisher instanceof BuildPublisher) {
-                recipients = ((BuildPublisher) publisher)
-                        .getNotificationRecipients();
-            }
-        } else if (request instanceof MavenBuild) {
-            MavenBuild build = (MavenBuild) request;
-            MavenReporter reporter = build.getProject().getReporters().get(
-                    MavenBuildPublisher.DESCRIPTOR);
-            if (!(reporter instanceof MavenBuildPublisher)) {
-                reporter = build.getProject().getParent().getReporters().get(
-                        MavenBuildPublisher.DESCRIPTOR);
-            }
+                String recipients = ((BuildPublisher) publisher).getNotificationRecipients();
+                if ((recipients == null) || recipients.trim().length() == 0) {
+                    return;
+                }
 
-            if (reporter instanceof MavenBuildPublisher) {
-                recipients = ((MavenBuildPublisher) reporter)
-                        .getNotificationRecipients();
+                // because of our custom modifications we can't use MailSender
+                // TODO remove this duplicity
+                try {
+                    new MailSender2(recipients, true, false, false, 
+                            hudsonInstance.getUrl()).execute(request, 
+                            new StreamBuildListener(System.out));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        if ((recipients == null) || recipients.trim().length() == 0) {
-            return;
-        }
-
-        // because of our custom modifications we can't use MailSender
-        // TODO remove this duplicity
-        try {
-            new MailSender2(recipients, true, false, false, hudsonInstance
-                    .getUrl()).execute(request, new StreamBuildListener(
-                    System.out));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
