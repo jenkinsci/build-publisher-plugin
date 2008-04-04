@@ -188,9 +188,9 @@ public class PublisherThread extends Thread {
                 }
 
                 // because of our custom modifications we can't use MailSender
-                // TODO remove this duplicity
+                // TODO remove this duplicity (maybe use ExtendedEmailPublisher?)
                 try {
-                    new MailSender2(recipients, true, false, false, 
+                    new MailSender2(recipients, true, false, true, 
                             hudsonInstance.getUrl()).execute(request, 
                             new StreamBuildListener(System.out));
                 } catch (InterruptedException e) {
