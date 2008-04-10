@@ -5,9 +5,11 @@ import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
+import hudson.maven.MavenBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.tasks.Publisher;
 import org.kohsuke.stapler.StaplerRequest;
@@ -41,8 +43,8 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
             return true;
         }
         
-        //MatrixRun can be published only after its parent build
-        if(build instanceof MatrixRun) {
+        //MatrixRun and MavenBuild can be published only after its parent build
+        if(build.getProject().getParent() != Hudson.getInstance()) {
             return true;
         }
 
