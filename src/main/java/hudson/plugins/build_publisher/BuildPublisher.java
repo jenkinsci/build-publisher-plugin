@@ -126,7 +126,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
             req.bindParameters(bp, "bp.");
             return bp;
         }
-
+        
         @Override
         public boolean configure(StaplerRequest req) throws FormException {
             int i;
@@ -174,8 +174,8 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
 
             return null;
         }
-
-    }
+        
+        }
 
     public String getServerName() {
         if(serverName==null) {

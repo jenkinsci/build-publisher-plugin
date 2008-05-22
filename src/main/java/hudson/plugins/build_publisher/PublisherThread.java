@@ -115,7 +115,6 @@ public class PublisherThread extends Thread {
                     
                     
                  
-                    sendMailNotification(currentRequest);
                     // Notify about success
                     HudsonInstance.LOGGER.info("Build #"
                             + currentRequest.getNumber() + " of project "
@@ -174,30 +173,6 @@ public class PublisherThread extends Thread {
      */
     public ThreadState getCurrentState() {
         return state;
-    }
-
-    private void sendMailNotification(AbstractBuild request) {
-
-        if (request instanceof Build) {
-            Build build = (Build) request;
-            Publisher publisher = ((Project) build.getProject()).getPublisher(BuildPublisher.DESCRIPTOR);
-            if (publisher instanceof BuildPublisher) {
-                String recipients = ((BuildPublisher) publisher).getNotificationRecipients();
-                if ((recipients == null) || recipients.trim().length() == 0) {
-                    return;
-                }
-
-                // because of our custom modifications we can't use MailSender
-                // TODO remove this duplicity (maybe use ExtendedEmailPublisher?)
-                try {
-                    new MailSender2(recipients, true, false, true, 
-                            hudsonInstance.getUrl()).execute(request, 
-                            new StreamBuildListener(System.out));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     /**

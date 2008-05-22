@@ -18,7 +18,4 @@
     <f:checkbox name="bp.publishFailedBuilds" checked="${h.defaultToTrue(instance.publishFailedBuilds)}" />
   </f:entry>
 
-  <f:entry title="Notification recipients" description="Whitespace-separated list of recipient addresses. E-mail will be sent when publishing is finished.">
-    <f:textbox name="bp.notificationRecipients" value="${instance.notificationRecipients}"/>
-  </f:entry>
 </j:jelly>
