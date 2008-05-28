@@ -12,10 +12,13 @@ import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.tasks.Publisher;
+import hudson.util.DescriptorList;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * {@link Publisher} responsible for submitting build results to public Hudson
@@ -25,11 +28,12 @@ import java.util.Map;
  *
  */
 public class BuildPublisher extends Publisher implements MatrixAggregatable {
-
+    
     private String serverName;
     private String notificationRecipients;
     private boolean publishUnstableBuilds;
     private boolean publishFailedBuilds;
+    private List<BuildPublisherPostAction> postActions = new Vector<BuildPublisherPostAction>();
 
     private transient HudsonInstance publicHudsonInstance;
 
@@ -121,7 +125,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         @Override
         public Publisher newInstance(StaplerRequest req)
                 throws hudson.model.Descriptor.FormException {
-
+            //TODO post-actions
             BuildPublisher bp = new BuildPublisher();
             req.bindParameters(bp, "bp.");
             return bp;
@@ -213,5 +217,13 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
 
     public void setServerName(String name) {
         this.serverName = name;
+    }
+
+    public HudsonInstance getPublicHudsonInstance() {
+        return publicHudsonInstance;
+    }
+
+    public Map<Descriptor<BuildPublisherPostAction>,BuildPublisherPostAction> getPostActions() {
+        return Descriptor.toMap(postActions);
     }
 }

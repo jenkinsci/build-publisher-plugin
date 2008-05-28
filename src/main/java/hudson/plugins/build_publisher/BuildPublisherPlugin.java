@@ -24,7 +24,7 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  * @plugin
  */
-public class PluginImpl extends Plugin {
+public class BuildPublisherPlugin extends Plugin {
     public void start() throws Exception {
         // plugins normally extend Hudson by providing custom implementations
         // of 'extension points'. In this example, we'll add one builder.

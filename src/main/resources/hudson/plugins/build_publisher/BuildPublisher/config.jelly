@@ -17,5 +17,5 @@
   <f:entry title="Publish failed builds">
     <f:checkbox name="bp.publishFailedBuilds" checked="${h.defaultToTrue(instance.publishFailedBuilds)}" />
   </f:entry>
-
+<!--TODO: post actions -->
 </j:jelly>

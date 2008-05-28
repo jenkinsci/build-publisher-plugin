@@ -11,6 +11,7 @@ import hudson.maven.MavenReporter;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
+import hudson.model.Descriptor;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.Project;
@@ -23,6 +24,8 @@ import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.logging.Level;
 
 /**
@@ -115,6 +118,7 @@ public class PublisherThread extends Thread {
                     
                     
                  
+                    runPostActions(currentRequest);
                     // Notify about success
                     HudsonInstance.LOGGER.info("Build #"
                             + currentRequest.getNumber() + " of project "
@@ -173,6 +177,18 @@ public class PublisherThread extends Thread {
      */
     public ThreadState getCurrentState() {
         return state;
+    }
+
+    private void runPostActions(AbstractBuild build) {
+        //run actions that are applicable every time
+        for(PostActionDescriptor descriptor: BuildPublisherPostAction.POST_ACTIONS) {
+            BuildPublisherPostAction action = descriptor.newInstance();
+            if(action != null) {
+                action.post(build, hudsonInstance);
+            }
+        }
+        //TODO: actions configured per-project
+        //use reflection to mimic project.getPublisher(descriptor)?
     }
 
     /**
