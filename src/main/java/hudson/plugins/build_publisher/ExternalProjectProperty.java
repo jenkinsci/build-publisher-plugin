@@ -2,6 +2,7 @@ package hudson.plugins.build_publisher;
 
 import hudson.Util;
 import hudson.maven.MavenModule;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.ItemGroup;
@@ -140,7 +141,8 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             }
             
             //Update next build number
-            int nextBuildNumber = project.getLastBuild().number + 1;
+            Run lastBuild = project.getLastBuild();
+            int nextBuildNumber = (lastBuild != null ? lastBuild.number : 0) + 1;
             project.updateNextBuildNumber(nextBuildNumber);            
             //Add confirmation header
             rsp.addHeader("X-Build-Recieved",project.getName());
