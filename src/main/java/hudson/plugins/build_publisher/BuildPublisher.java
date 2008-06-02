@@ -178,8 +178,13 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
 
             return null;
         }
-        
+
+        @Override
+        public String getHelpFile() {
+            return "/plugin/build-publisher/help/config/publish.html";
         }
+        
+    }
 
     public String getServerName() {
         if(serverName==null) {
