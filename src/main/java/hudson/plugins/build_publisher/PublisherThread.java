@@ -112,7 +112,9 @@ public class PublisherThread extends Thread {
                     //.. and all matrix runs as well
                     else if(currentRequest instanceof MatrixBuild)  {
                         for(MatrixRun run: ((MatrixBuild) currentRequest).getRuns()) {
-                            hudsonInstance.publishNewBuild(run);
+                            if(run != null) {
+                                hudsonInstance.publishNewBuild(run);
+                            }
                         }
                     }
                     
