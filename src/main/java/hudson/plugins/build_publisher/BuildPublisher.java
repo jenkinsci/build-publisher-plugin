@@ -190,7 +190,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         if(serverName==null) {
             // pick up the default instance
             HudsonInstance[] instances = DESCRIPTOR.getPublicInstances();
-            if(instances.length==1)
+            if((instances != null) && (instances.length==1))
                 return instances[0].getName();
         }
         return serverName;
