@@ -2,6 +2,7 @@ package hudson.plugins.build_publisher;
 
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenModule;
@@ -215,9 +216,13 @@ public class PublisherThread extends Thread {
                 submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
                         + moduleModuleSystemName, module);
             }
+        } else if(project instanceof MatrixProject) {
+            //Synchronize active matrix configurarions
+            String parentURL = publicHudson + "job/" + project.getName();
+            for(MatrixConfiguration configuration: ((MatrixProject) project).getActiveConfigurations()) {
+                    submitConfig(parentURL+"/"+configuration.getShortUrl() +"config.xml", configuration);
+            }
         } else if(project instanceof ItemGroup) {
-            //This could work generaly only if all project types contained informations about sub-projects in their main config file - which is not true :-/.
-            //(it means that this is useful only for matrix projects at the moment)
             String parentURL = publicHudson + "job/" + project.getName();
             for(Object item: ((ItemGroup) project).getItems()) {
                 if(item instanceof Job) {
@@ -225,7 +230,6 @@ public class PublisherThread extends Thread {
                     submitConfig(parentURL+"/"+job.getShortUrl() +"config.xml", job);
                     
                 }
-                
             }
         }
     }
