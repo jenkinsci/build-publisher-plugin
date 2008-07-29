@@ -196,6 +196,11 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         return serverName;
     }
 
+    @Override
+    public boolean needsToRunAfterFinalized() {
+        return true;
+    }
+
     public String getNotificationRecipients() {
         return notificationRecipients;
     }
