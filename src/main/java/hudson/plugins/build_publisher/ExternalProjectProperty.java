@@ -73,7 +73,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
     private static void acceptChildProject(StaplerRequest req, StaplerResponse rsp,
             AbstractProject project, String subDir)
             throws IOException {
-        project.checkPermission(Permission.CONFIGURE);
+        project.checkPermission(Job.CONFIGURE);
 
         String name = req.getParameter("name").trim();
         File modulesDir = new File(project.getRootDir(), subDir);
@@ -108,7 +108,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
      */
     public void doAcceptBuild(StaplerRequest req, StaplerResponse rsp)
             throws IOException {
-        project.checkPermission(Permission.CONFIGURE);
+        project.checkPermission(Job.CONFIGURE);
 
         // Don't send notifications for old builds
         Set<String> oldBuildIDs = new HashSet<String>();
