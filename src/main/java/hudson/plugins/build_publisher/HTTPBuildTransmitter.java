@@ -144,18 +144,24 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                     + "loginEntry");
             followRedirects(loginMethod, hudsonInstance);
 
-            PostMethod credentialsMethod = new PostMethod(hudsonInstance
-                    .getUrl()
-                    + "j_security_check");
-            credentialsMethod.addParameter("j_username", hudsonInstance
-                    .getLogin());
-            credentialsMethod.addParameter("j_password", hudsonInstance
-                    .getPassword());
-            credentialsMethod.addParameter("action", "login");
-            followRedirects(credentialsMethod, hudsonInstance);
+            try {
+                login("j_security_check", hudsonInstance);
+            } catch (ServerFailureException e) {
+                // Here if the servlet authentication is not available.
+                login("j_acegi_security_check", hudsonInstance);
+            }
         }
 
         return followRedirects(method, hudsonInstance);
+    }
+    
+    private static void login(String type, HudsonInstance hudsonInstance)
+            throws ServerFailureException {
+        PostMethod servletSecurityMethod = new PostMethod(hudsonInstance.getUrl() + type);
+        servletSecurityMethod.addParameter("j_username", hudsonInstance.getLogin());
+        servletSecurityMethod.addParameter("j_password", hudsonInstance.getPassword());
+        servletSecurityMethod.addParameter("action", "login");
+        followRedirects(servletSecurityMethod, hudsonInstance);
     }
 
     // see executeMethod for contracts
