@@ -159,7 +159,7 @@ public class PublisherThread extends Thread {
                     } catch (InterruptedException e1) {
                         // note that this also happens when the administrator manually forced a retry,
                         // ignoring timeout
-                        HudsonInstance.LOGGER.log(Level.SEVERE,"Build oublisher thread was interrupted",e1);
+                        HudsonInstance.LOGGER.log(Level.SEVERE,"Build publisher thread was interrupted",e1);
                     }
                 }
             }
