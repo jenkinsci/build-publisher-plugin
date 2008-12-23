@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.httpclient.params.HttpClientParams;
 
 /**
  * Represents remote public Hudson instance.
@@ -132,7 +133,10 @@ public final class HudsonInstance {
         publishRequestQueue = new LinkedHashSet<AbstractBuild>();
         buildTransmitter = new HTTPBuildTransmitter();
         SimpleHttpConnectionManager connectionManager = new SimpleHttpConnectionManager();
-        client = new HttpClient(connectionManager);
+        HttpClientParams params = new HttpClientParams();
+        //set SO_TIMEOUT to prevent thread hang-up
+        params.setSoTimeout(10 * 60 * 1000);
+        client = new HttpClient(params, connectionManager);
         
         // --- authentication
         
