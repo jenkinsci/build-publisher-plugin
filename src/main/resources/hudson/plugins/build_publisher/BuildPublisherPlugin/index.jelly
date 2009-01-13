@@ -15,7 +15,7 @@
             <h3>${%Builds pending publication}</h3>
             <ol>
               <j:forEach var="b" items="${h.queue}">
-                <li>${b}</li>
+                <li><a href="${b.absoluteUrl}">${b}</a></li>
               </j:forEach>
             </ol>
           </j:otherwise>
