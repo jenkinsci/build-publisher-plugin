@@ -9,7 +9,7 @@
         <j:set var="q" value="${h.queue}"/>
         <j:choose>
           <j:when test="${empty(q)}">
-            ${%No builds is waiting for publication}
+            ${%No build is waiting for publication}
           </j:when>
           <j:otherwise>
             <h3>${%Builds pending publication}</h3>
