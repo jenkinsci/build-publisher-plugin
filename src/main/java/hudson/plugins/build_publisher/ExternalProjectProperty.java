@@ -25,9 +25,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -255,11 +255,9 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         }
         
         //Could not use getProperty(...) 
-        Iterator<JobProperty> iter = job.getProperties().values().iterator();
-        while(iter.hasNext()) {
-            JobProperty prop = iter.next();
+        for (JobProperty prop : (Collection<JobProperty>)job.getProperties().values()) {
             //hem... >:-|
-            if(prop.getClass().getName().equals("hudson.plugins.build_publisher.ExternalProjectProperty")) {
+            if (prop.getClass().getName().equals("hudson.plugins.build_publisher.ExternalProjectProperty")) {
                 return;
             }
         }
