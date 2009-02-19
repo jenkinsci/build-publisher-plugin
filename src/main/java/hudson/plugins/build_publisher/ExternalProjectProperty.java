@@ -2,7 +2,6 @@ package hudson.plugins.build_publisher;
 
 import hudson.Util;
 import hudson.maven.MavenModule;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.ItemGroup;
@@ -12,7 +11,6 @@ import hudson.model.JobPropertyDescriptor;
 import hudson.model.Project;
 import hudson.model.ProminentProjectAction;
 import hudson.model.Run;
-import hudson.security.Permission;
 import hudson.tasks.ArtifactArchiver;
 import hudson.util.IOException2;
 import net.sf.json.JSONObject;
@@ -32,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Recieves builds submitted remotely via HTTP.
@@ -107,7 +104,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
      * "Collecting basket" for incoming builds.
      */
     public void doAcceptBuild(StaplerRequest req, StaplerResponse rsp)
-            throws IOException {
+            throws IOException, InterruptedException {
         project.checkPermission(Job.CONFIGURE);
 
         // Don't send notifications for old builds
@@ -161,7 +158,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         }
     }
 
-    private void tidyUp() throws IOException {
+    private void tidyUp() throws IOException, InterruptedException {
         // delete old builds
         project.logRotate();
 
