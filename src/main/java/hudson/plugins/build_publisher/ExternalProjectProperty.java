@@ -3,7 +3,6 @@ package hudson.plugins.build_publisher;
 import hudson.Util;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.JobProperty;
@@ -11,6 +10,7 @@ import hudson.model.JobPropertyDescriptor;
 import hudson.model.Project;
 import hudson.model.ProminentProjectAction;
 import hudson.model.Run;
+import hudson.model.AbstractBuild;
 import hudson.tasks.ArtifactArchiver;
 import hudson.util.IOException2;
 import net.sf.json.JSONObject;
@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +41,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
     private static final Logger LOGGER = Logger.getLogger(ExternalProjectProperty.class.getName());
 
-    private transient AbstractProject project;
+    private transient AbstractProject<?,?> project;
 
     @Override
     public JobPropertyDescriptor getDescriptor() {
@@ -129,7 +128,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             
             //Remove publishing status actions (so that they don't confuse users).
             //We don't know which (or how many) builds arrive - need to check them all
-            for(Run build: (List<Run>) project.getBuilds()) {
+            for(Run build: project.getBuilds()) {
                 StatusAction statusAction = build.getAction(StatusAction.class);
                 if(statusAction != null) {
                     build.getActions().remove(statusAction);
@@ -165,11 +164,9 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         // keep artifacts of last successful build only
         // (taken from ArtifactArchiver)
         if (project instanceof Project) {
-            ArtifactArchiver archiver = (ArtifactArchiver) ((Project<?, ?>) project)
-                    .getPublisher(ArtifactArchiver.DESCRIPTOR);
+            ArtifactArchiver archiver = project.getPublishersList().get(ArtifactArchiver.class);
             if ((archiver != null) && archiver.isLatestOnly()) {
-                Build<?, ?> build = ((Project<?, ?>) project)
-                        .getLastSuccessfulBuild();
+                AbstractBuild<?, ?> build = project.getLastSuccessfulBuild();
                 if (build != null) {
                     while (true) {
                         build = build.getPreviousBuild();
@@ -247,7 +244,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
     /**
      * Checks if the given project already has this property and posibly adds it (recursive for ItemGroups).
      */
-    public static void applyToProject(Job job) throws IOException {
+    public static void applyToProject(Job<?,?> job) throws IOException {
         if(job instanceof ItemGroup) {
             for(Object item: ((ItemGroup) job).getItems()) {
                 applyToProject((Job /*too optimistic assumption?*/) item);
@@ -255,7 +252,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         }
         
         //Could not use getProperty(...) 
-        for (JobProperty prop : (Collection<JobProperty>)job.getProperties().values()) {
+        for (JobProperty prop : job.getProperties().values()) {
             //hem... >:-|
             if (prop.getClass().getName().equals("hudson.plugins.build_publisher.ExternalProjectProperty")) {
                 return;
