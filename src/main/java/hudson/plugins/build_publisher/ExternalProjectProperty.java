@@ -108,7 +108,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
         // Don't send notifications for old builds
         Set<String> oldBuildIDs = new HashSet<String>();
-        for (Run run : (List<Run>) project.getBuilds()) {
+        for (Run run : project.getBuilds()) {
             oldBuildIDs.add(run.getId());
         }
 
