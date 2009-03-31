@@ -19,10 +19,6 @@
      <artifactId>commons-httpclient</artifactId>
      <version>3.1</version>
    </dependency>
-    <dependency>
-      <groupId>org.jvnet.hudson.main</groupId>
-      <artifactId>maven-plugin</artifactId>
-    </dependency>
  </dependencies>
 
   <scm>
