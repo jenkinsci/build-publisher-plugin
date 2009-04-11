@@ -229,8 +229,9 @@ public final class HudsonInstance {
     private void saveQueue() {
         List<RequestHolder> holders = new LinkedList<RequestHolder>();
         for (AbstractBuild request : publishRequestQueue) {
-            RequestHolder holder = new RequestHolder(request.getNumber(),
-                    request.getProject().getFullName());
+            int n = request.getNumber();
+            AbstractProject p = request.getProject();
+            RequestHolder holder = new RequestHolder(n,p.getFullName());
             holders.add(holder);
         }
         XmlFile file = new XmlFile(new File(Hudson.getInstance().getRootDir(),
