@@ -11,7 +11,7 @@
   <packaging>hpi</packaging>
   <version>1.5-SNAPSHOT</version>
   <name>Hudson Build-Publisher plugin </name>
-  <url>http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin</url>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Build+Publisher+Plugin</url>
   
  <dependencies>
    <dependency>
