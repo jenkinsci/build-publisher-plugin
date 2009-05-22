@@ -12,6 +12,7 @@ import hudson.model.ProminentProjectAction;
 import hudson.model.Run;
 import hudson.model.AbstractBuild;
 import hudson.tasks.ArtifactArchiver;
+import hudson.tasks.LogRotator;
 import hudson.util.IOException2;
 import net.sf.json.JSONObject;
 import org.apache.tools.ant.BuildException;
@@ -125,7 +126,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             
             //Load incoming builds from disk
             reloadProject(project);
-            
+
             //Remove publishing status actions (so that they don't confuse users).
             //We don't know which (or how many) builds arrive - need to check them all
             for(Run build: project.getBuilds()) {
@@ -159,7 +160,17 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 
     private void tidyUp() throws IOException, InterruptedException {
         // delete old builds
-        project.logRotate();
+
+        //reflect plugin-specific settings
+        BuildPublisher publisher = (BuildPublisher) project.getPublishersList().get(BuildPublisher.DESCRIPTOR);
+        if (publisher != null) {
+            LogRotator rotator = publisher.getLogRotator();
+            if (rotator != null) {
+                rotator.perform(project);
+            } else {
+                project.logRotate();
+            }
+        }
 
         // keep artifacts of last successful build only
         // (taken from ArtifactArchiver)

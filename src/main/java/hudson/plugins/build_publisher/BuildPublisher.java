@@ -9,8 +9,10 @@ import hudson.maven.MavenBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.model.Result;
+import hudson.tasks.LogRotator;
 import hudson.tasks.Publisher;
 import hudson.util.DescriptorList;
 import org.kohsuke.stapler.StaplerRequest;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import net.sf.json.JSONObject;
 
 /**
  * {@link Publisher} responsible for submitting build results to public Hudson
@@ -34,6 +37,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
     private boolean publishUnstableBuilds;
     private boolean publishFailedBuilds;
     private List<BuildPublisherPostAction> postActions = new Vector<BuildPublisherPostAction>();
+    private LogRotator logRotator;
 
     private transient HudsonInstance publicHudsonInstance;
 
@@ -123,11 +127,16 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         }
 
         @Override
-        public Publisher newInstance(StaplerRequest req)
-                throws hudson.model.Descriptor.FormException {
+        public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             //TODO post-actions
             BuildPublisher bp = new BuildPublisher();
             req.bindParameters(bp, "bp.");
+
+            if (req.getParameter("publicLogrotate") != null) {
+                bp.logRotator = LogRotator.DESCRIPTOR.newInstance(req,formData);
+            } else {
+                bp.logRotator = null;
+            }
             return bp;
         }
         
@@ -235,5 +244,13 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
 
     public Map<Descriptor<BuildPublisherPostAction>,BuildPublisherPostAction> getPostActions() {
         return Descriptor.toMap(postActions);
+    }
+
+    public LogRotator getLogRotator() {
+        return logRotator;
+    }
+
+    public void setLogRotator(LogRotator logRotator) {
+        this.logRotator = logRotator;
     }
 }

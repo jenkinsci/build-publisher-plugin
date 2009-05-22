@@ -17,5 +17,13 @@
   <f:entry title="Publish failed builds" help="/plugin/build-publisher/help/config/failed.html">
     <f:checkbox name="bp.publishFailedBuilds" checked="${h.defaultToTrue(instance.publishFailedBuilds)}" />
   </f:entry>
+
+  <f:advanced>
+    <f:optionalBlock name="publicLogrotate"
+      help="/help/project-config/log-rotation.html"
+      title="${%Discard Old Builds}" checked="${instance.logRotator!=null}">
+      <st:include page="/hudson/tasks/LogRotator/config.jelly" it="${instance}" />
+    </f:optionalBlock>
+  </f:advanced>
 <!--TODO: post actions -->
 </j:jelly>
