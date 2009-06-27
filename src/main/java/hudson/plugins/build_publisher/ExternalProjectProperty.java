@@ -25,9 +25,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -113,16 +117,62 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             oldBuildIDs.add(run.getId());
         }
 
+        File buildsDir = new File(project.getRootDir(), "builds");
+        
         //Untar incoming builds unto the build directory
         Untar untar = new Untar();
         untar.setProject(new org.apache.tools.ant.Project());
         untar.add(new InputStreamResource(project.getName(),
                 new BufferedInputStream(req.getInputStream())));
-        untar.setDest(new File(project.getRootDir(), "builds"));
+        untar.setDest(buildsDir);
         untar.setOverwrite(true);
 
+        Enumeration paramNames = req.getParameterNames();
+        while(paramNames.hasMoreElements()) {
+        	HudsonInstance.LOGGER.info("Got param: " + (String)paramNames.nextElement());
+        }
+        Enumeration attrNames = req.getAttributeNames();
+        while(attrNames.hasMoreElements()) {
+        	HudsonInstance.LOGGER.info("Got attr: " + (String)attrNames.nextElement());
+        }
+        Enumeration hdrNames = req.getHeaderNames();
+        while(attrNames.hasMoreElements()) {
+        	HudsonInstance.LOGGER.info("Got hdr: " + (String)hdrNames.nextElement());
+        }
+        String publisherTimezoneID = (String)req.getHeader("X-Publisher-Timezone");
+        HudsonInstance.LOGGER.info("Got timezone " + publisherTimezoneID);
+        TimeZone publisherTimezone = null;
+        String buildId = null;
+        String newId = null;
+        DateFormat dateFormatter = null;
+        DateFormat oldDateFormatter = null;
+        if(publisherTimezoneID!=null) {
+        	publisherTimezone = TimeZone.getTimeZone(publisherTimezoneID);
+            dateFormatter = Run.getIDFormatter();
+            buildId = (String)req.getHeader("X-Build-ID");
+            oldDateFormatter = (DateFormat)dateFormatter.clone();
+            oldDateFormatter.setTimeZone(publisherTimezone);
+        }
+        
         try {
+        	if(publisherTimezone!=null) {
+	        	try {
+	        		newId = dateFormatter.format(oldDateFormatter.parse(buildId));
+	        	} catch (ParseException e) {
+	        		throw new BuildException("Failed to parse buildId", e);
+	        	}
+        	}
+        	
             untar.execute();
+            
+            if(publisherTimezone!=null) {
+	            File oldBuildDir = new File(buildsDir, buildId);
+	            File newBuildDir = new File(buildsDir, newId);
+	            
+	            System.out.println("Renaming: " + oldBuildDir.getCanonicalPath() + " to " + newBuildDir.getCanonicalPath());
+	            
+	            oldBuildDir.renameTo(newBuildDir);
+            }
             
             //Load incoming builds from disk
             reloadProject(project);

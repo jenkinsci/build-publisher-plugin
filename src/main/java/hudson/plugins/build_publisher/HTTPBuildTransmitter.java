@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import org.apache.commons.httpclient.HttpException;
 
@@ -40,7 +41,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
     private PostMethod method;
     private boolean aborted = false;
 
-    @Override
     public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance)
             throws ServerFailureException {
 
@@ -74,6 +74,9 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
             method.setRequestEntity(new FileRequestEntity(tempFile,
                     "application/x-tar"));
+            
+            method.setRequestHeader("X-Publisher-Timezone", TimeZone.getDefault().getID());
+            method.setRequestHeader("X-Build-ID", build.getId());
 
             executeMethod(method, hudsonInstance);
             
@@ -103,7 +106,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
     }
 
-    @Override
     public void abortTransmission() {
         aborted = true;
         if (method != null) {
