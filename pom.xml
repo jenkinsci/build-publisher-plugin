@@ -9,7 +9,7 @@
   
   <artifactId>build-publisher</artifactId>
   <packaging>hpi</packaging>
-  <version>1.6</version>
+  <version>1.7-SNAPSHOT</version>
   <name>Hudson Build-Publisher plugin </name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Build+Publisher+Plugin</url>
   
@@ -24,10 +24,4 @@
       <artifactId>maven-plugin</artifactId>
     </dependency>
  </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/build-publisher-1.6</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/build-publisher-1.6</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/build-publisher/tags/build-publisher-1.6</url>
-  </scm>
 </project>
