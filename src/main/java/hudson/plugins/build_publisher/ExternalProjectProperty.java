@@ -127,37 +127,29 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         untar.setDest(buildsDir);
         untar.setOverwrite(true);
 
-        Enumeration paramNames = req.getParameterNames();
-        while(paramNames.hasMoreElements()) {
-        	HudsonInstance.LOGGER.info("Got param: " + (String)paramNames.nextElement());
-        }
-        Enumeration attrNames = req.getAttributeNames();
-        while(attrNames.hasMoreElements()) {
-        	HudsonInstance.LOGGER.info("Got attr: " + (String)attrNames.nextElement());
-        }
-        Enumeration hdrNames = req.getHeaderNames();
-        while(attrNames.hasMoreElements()) {
-        	HudsonInstance.LOGGER.info("Got hdr: " + (String)hdrNames.nextElement());
-        }
         String publisherTimezoneID = (String)req.getHeader("X-Publisher-Timezone");
-        HudsonInstance.LOGGER.info("Got timezone " + publisherTimezoneID);
+        LOGGER.info("Got remote timezone " + publisherTimezoneID);
         TimeZone publisherTimezone = null;
         String buildId = null;
         String newId = null;
         DateFormat dateFormatter = null;
         DateFormat oldDateFormatter = null;
         if(publisherTimezoneID!=null) {
-        	publisherTimezone = TimeZone.getTimeZone(publisherTimezoneID);
+       	    publisherTimezone = TimeZone.getTimeZone(publisherTimezoneID);
             dateFormatter = Run.getIDFormatter();
             buildId = (String)req.getHeader("X-Build-ID");
             oldDateFormatter = (DateFormat)dateFormatter.clone();
             oldDateFormatter.setTimeZone(publisherTimezone);
+            LOGGER.fine("Local timezone " + dateFormatter.getTimeZone());
+            LOGGER.fine("Remote timezone " + publisherTimezone);
         }
         
         try {
         	if(publisherTimezone!=null) {
 	        	try {
+                                LOGGER.fine("Original build time " + oldDateFormatter.parse(buildId));
 	        		newId = dateFormatter.format(oldDateFormatter.parse(buildId));
+                                LOGGER.fine("New build ID " + newId);
 	        	} catch (ParseException e) {
 	        		throw new BuildException("Failed to parse buildId", e);
 	        	}
@@ -169,9 +161,11 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
 	            File oldBuildDir = new File(buildsDir, buildId);
 	            File newBuildDir = new File(buildsDir, newId);
 	            
-	            System.out.println("Renaming: " + oldBuildDir.getCanonicalPath() + " to " + newBuildDir.getCanonicalPath());
+	            LOGGER.info("Renaming: " + oldBuildDir.getCanonicalPath() + " to " + newBuildDir.getCanonicalPath());
 	            
 	            oldBuildDir.renameTo(newBuildDir);
+            } else {
+                LOGGER.info("No remote timezone found");
             }
             
             //Load incoming builds from disk
