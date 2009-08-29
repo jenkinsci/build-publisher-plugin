@@ -143,10 +143,10 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         @Override
         public boolean configure(StaplerRequest req) throws FormException {
             int i;
-            String[] names = req.getParameterValues("name");
-            String[] urls = req.getParameterValues("url");
-            String[] logins = req.getParameterValues("login");
-            String[] passwords = req.getParameterValues("password");
+            String[] names = req.getParameterValues("bp.name");
+            String[] urls = req.getParameterValues("bp.url");
+            String[] logins = req.getParameterValues("bp.login");
+            String[] passwords = req.getParameterValues("bp.password");
             int len;
             if (names != null && urls != null)
                 len = Math.min(names.length, urls.length);

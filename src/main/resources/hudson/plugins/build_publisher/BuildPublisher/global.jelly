@@ -5,21 +5,21 @@
       
       <f:repeatable var="serv" items="${descriptor.publicInstances}" noAddButton="true" minimum="1">
         <table width="100%">
-          <f:entry title="name" help="/plugin/build-publisher/help/global/name.html">
-            <f:textbox name="name" value="${serv.getName()}"/>
+          <f:entry title="Name" help="/plugin/build-publisher/help/global/name.html">
+            <f:textbox name="bp.name" value="${serv.getName()}"/>
           </f:entry>
 
           <f:entry title="URL" help="/plugin/build-publisher/help/global/url.html">
-            <f:textbox name="url" value="${serv.getUrl()}" checkUrl="'${rootURL}/plugin/build-publisher/checkHudsonUrl?value='+encode(this.value)"/>
+            <f:textbox name="bp.url" value="${serv.getUrl()}" checkUrl="'${rootURL}/plugin/build-publisher/checkHudsonUrl?value='+encode(this.value)"/>
           </f:entry>
 
 
           <f:entry title="Login" help="/plugin/build-publisher/help/global/login.html">
-            <f:textbox name="login" value="${serv.getLogin()}"/>
+            <f:textbox name="bp.login" value="${serv.getLogin()}"/>
           </f:entry>
         
           <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
-            <input class="setting-input" name="password"
+            <input class="setting-input" name="bp.password"
                    type="password" value="${serv.getPassword()}"/>
           </f:entry>
 
