@@ -12,6 +12,13 @@
   <version>1.7-SNAPSHOT</version>
   <name>Hudson Build-Publisher plugin </name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Build+Publisher+Plugin</url>
+
+  <developers>
+    <developer>
+      <id>dvrzalik</id>
+      <name>David Vrzalik</name>
+    </developer>
+  </developers>
   
  <dependencies>
    <dependency>
