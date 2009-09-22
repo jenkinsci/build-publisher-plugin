@@ -1,11 +1,10 @@
 package hudson.plugins.build_publisher;
 
+import hudson.Extension;
 import hudson.Plugin;
 import hudson.util.FormFieldValidator;
 import hudson.model.Hudson;
-import hudson.model.Jobs;
 import hudson.model.ManagementLink;
-import hudson.tasks.BuildStep;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -25,28 +24,24 @@ import java.io.IOException;
  * @plugin
  */
 public class BuildPublisherPlugin extends Plugin {
-    public void start() throws Exception {
-        // plugins normally extend Hudson by providing custom implementations
-        // of 'extension points'. In this example, we'll add one builder.
-        BuildStep.PUBLISHERS.addNotifier(BuildPublisher.DESCRIPTOR);
+    @Extension
+    public static class BuildPublisherManagementLink extends ManagementLink {
+        public String getIconFileName() {
+            return "redo.gif";
+        }
 
-        ManagementLink.LIST.add(new ManagementLink() {
-            public String getIconFileName() {
-                return "redo.gif";
-            }
+        public String getUrlName() {
+            return "plugin/build-publisher/";
+        }
 
-            public String getUrlName() {
-                return "plugin/build-publisher/";
-            }
+        public String getDisplayName() {
+            return "Build Publishing Status";
+        }
 
-            public String getDisplayName() {
-                return "Build Publishing Status";
-            }
-
-            public String getDescription() {
-                return "Monitor the status of <a href='http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin'>the build-publisher plugin</a>";
-            }
-        });
+        @Override
+        public String getDescription() {
+            return "Monitor the status of <a href='http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin'>the build-publisher plugin</a>";
+        }
     }
 
     // for Jelly

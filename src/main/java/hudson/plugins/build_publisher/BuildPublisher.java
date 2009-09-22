@@ -1,20 +1,22 @@
 package hudson.plugins.build_publisher;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixRun;
-import hudson.maven.MavenBuild;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.model.Result;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.LogRotator;
+import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import hudson.util.DescriptorList;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -30,7 +32,7 @@ import net.sf.json.JSONObject;
  * @author dvrzalik@redhat.com
  *
  */
-public class BuildPublisher extends Publisher implements MatrixAggregatable {
+public class BuildPublisher extends Notifier implements MatrixAggregatable {
     
     private String serverName;
     private String notificationRecipients;
@@ -98,14 +100,15 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
     /*---------------------------------*/
 
     @Override
-    public Descriptor<Publisher> getDescriptor() {
+    public BuildStepDescriptor<Publisher> getDescriptor() {
         return DESCRIPTOR;
     }
 
+    @Extension
     public static final BuildPublisherDescriptor DESCRIPTOR = new BuildPublisherDescriptor();
 
     public static final class BuildPublisherDescriptor extends
-            Descriptor<Publisher> {
+            BuildStepDescriptor<Publisher> {
 
         private HudsonInstance[] publicInstances = new HudsonInstance[0];
 
@@ -141,7 +144,7 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         }
         
         @Override
-        public boolean configure(StaplerRequest req) throws FormException {
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             int i;
             String[] names = req.getParameterValues("bp.name");
             String[] urls = req.getParameterValues("bp.url");
@@ -189,6 +192,11 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
         }
 
         @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
+        }
+
+        @Override
         public String getHelpFile() {
             return "/plugin/build-publisher/help/config/publish.html";
         }
@@ -208,6 +216,11 @@ public class BuildPublisher extends Publisher implements MatrixAggregatable {
     @Override
     public boolean needsToRunAfterFinalized() {
         return true;
+    }
+
+    @Override
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
     }
 
     public String getNotificationRecipients() {
