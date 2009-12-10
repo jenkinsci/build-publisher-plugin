@@ -8,26 +8,19 @@ import hudson.maven.MavenBuild;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
-import hudson.maven.MavenReporter;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Descriptor;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
-import hudson.model.Project;
-import hudson.model.StreamBuildListener;
-import hudson.tasks.Publisher;
+
+import java.io.IOException;
+import java.util.logging.Level;
+
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.logging.Level;
 
 /**
  * {@link Thread} responsible for reading the queue and sending builds.
@@ -220,7 +213,7 @@ public class PublisherThread extends Thread {
             //Synchronize active matrix configurarions
             String parentURL = publicHudson + "job/" + project.getName();
             for(MatrixConfiguration configuration: ((MatrixProject) project).getActiveConfigurations()) {
-                    submitConfig(parentURL+"/"+configuration.getShortUrl() +"config.xml", configuration);
+                    submitConfig(parentURL+"/"+ hudson.Util.rawEncode(configuration.getName()) +"/config.xml", configuration);
             }
         } else if(project instanceof ItemGroup) {
             String parentURL = publicHudson + "job/" + project.getName();
