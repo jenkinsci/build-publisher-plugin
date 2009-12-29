@@ -40,7 +40,7 @@ public class BuildPublisherPlugin extends Plugin {
 
         @Override
         public String getDescription() {
-            return "Monitor the status of <a href='http://hudson.gotdns.com/wiki/display/HUDSON/Build+Publisher+Plugin'>the build-publisher plugin</a>";
+            return "Monitor the status of the <a href='http://wiki.hudson-ci.org/display/HUDSON/Build+Publisher+Plugin'>build-publisher plugin</a>";
         }
     }
 
