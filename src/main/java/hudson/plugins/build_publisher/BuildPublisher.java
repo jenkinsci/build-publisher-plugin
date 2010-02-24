@@ -252,7 +252,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
     }
 
     public HudsonInstance getPublicHudsonInstance() {
-        return publicHudsonInstance;
+        return BuildPublisher.DESCRIPTOR.getHudsonInstanceForName(getServerName());  //transient attribute, it's not sure, that is set-up, when called
     }
 
     public Map<Descriptor<BuildPublisherPostAction>,BuildPublisherPostAction> getPostActions() {
