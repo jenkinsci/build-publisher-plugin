@@ -31,7 +31,13 @@
           </f:entry>
         </table>
       </f:repeatable>
-      
+    </f:entry>
+    
+    <f:entry title="Receiving Builds">
+      <f:entry title="">
+        <f:checkbox name="bp.server.removeTriggers" checked="${descriptor.removeTriggers}"  help="/plugin/build-publisher/help/global/remove_triggers.html"/>
+        <label class="attach-previous">${%Remove Triggers when receiving Builds}</label>
+      </f:entry>
     </f:entry>
   </f:section>
 </j:jelly>

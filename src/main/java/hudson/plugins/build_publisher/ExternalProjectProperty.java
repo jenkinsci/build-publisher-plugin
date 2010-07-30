@@ -35,6 +35,8 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.triggers.TriggerDescriptor;
+
 /**
  * Recieves builds submitted remotely via HTTP.
  *
@@ -127,6 +129,11 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         untar.setDest(buildsDir);
         untar.setOverwrite(true);
 
+        
+        if (BuildPublisher.DESCRIPTOR.getRemoveTriggers()) {
+        	removeTriggers(project);
+        }
+
         String publisherTimezoneID = (String)req.getHeader("X-Publisher-Timezone");
         LOGGER.info("Got remote timezone " + publisherTimezoneID);
         TimeZone publisherTimezone = null;
@@ -201,6 +208,14 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
                     + project.getName(), e);
         }
     }
+
+	private void removeTriggers(AbstractProject<?,?> project) throws IOException {
+		for(TriggerDescriptor trigger: project.getTriggers().keySet()) {
+			project.removeTrigger(trigger);
+		}
+		
+		project.save();
+	}
 
     private void tidyUp() throws IOException, InterruptedException {
         // delete old builds

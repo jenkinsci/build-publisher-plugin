@@ -9,7 +9,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
@@ -111,6 +110,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             BuildStepDescriptor<Publisher> {
 
         private HudsonInstance[] publicInstances = new HudsonInstance[0];
+        private boolean removeTriggers;
 
         protected BuildPublisherDescriptor() {
             super(BuildPublisher.class);
@@ -127,6 +127,15 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         @Override
         public String getDisplayName() {
             return "Publish build";
+        }
+        
+
+        public void setRemoveTriggers(boolean removeTriggers) {
+            this.removeTriggers = removeTriggers;
+        }
+
+        public boolean getRemoveTriggers() {
+            return removeTriggers;
         }
 
         @Override
@@ -150,6 +159,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             String[] urls = req.getParameterValues("bp.url");
             String[] logins = req.getParameterValues("bp.login");
             String[] passwords = req.getParameterValues("bp.password");
+
             int len;
             if (names != null && urls != null)
                 len = Math.min(names.length, urls.length);
@@ -171,6 +181,8 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             }
 
             this.publicInstances = servers;
+            
+            req.bindParameters(this, "bp.server.");
 
             save();
 
