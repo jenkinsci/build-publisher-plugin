@@ -19,6 +19,7 @@ import hudson.tasks.Publisher;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -154,33 +155,23 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            int i;
             String[] names = req.getParameterValues("bp.name");
             String[] urls = req.getParameterValues("bp.url");
             String[] logins = req.getParameterValues("bp.login");
             String[] passwords = req.getParameterValues("bp.password");
 
-            int len;
-            if (names != null && urls != null)
-                len = Math.min(names.length, urls.length);
-            else
-                len = 0;
-            HudsonInstance[] servers = new HudsonInstance[len];
-
-            for (i = 0; i < len; i++) {
-
+            List<HudsonInstance> servers = new ArrayList<HudsonInstance>();
+            for (int i = 0; i < names.length; i++) {
                 if (urls[i].length() == 0) {
                     continue;
                 }
                 if (names[i].length() == 0) {
                     names[i] = urls[i];
                 }
-
-                servers[i] = new HudsonInstance(names[i], urls[i], logins[i],
-                        passwords[i]);
+                servers.add(new HudsonInstance(names[i], urls[i], logins[i], passwords[i]));
             }
 
-            this.publicInstances = servers;
+            this.publicInstances = servers.toArray(new HudsonInstance[0]);
             
             req.bindParameters(this, "bp.server.");
 
