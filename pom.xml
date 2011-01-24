@@ -19,6 +19,12 @@
       <name>Vojtech Juranek</name>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/hudson/build-publisher-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:hudson/build-publisher-plugin.git</developerConnection>
+    <url>http://github.com/hudson/build-publisher-plugin</url>
+  </scm>
   
  <dependencies>
    <dependency>
