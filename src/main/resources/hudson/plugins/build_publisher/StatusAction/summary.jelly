@@ -1,6 +1,0 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-  <t:summary icon="${it.iconName}">
-    Publishing status:
-    <st:include it="${it.statusInfo}" page="index.jelly" />
-  </t:summary>
-</j:jelly>
