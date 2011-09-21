@@ -118,7 +118,7 @@ public final class HudsonInstance {
         initVariables();
 
         // let's wait until Hudson's initialized
-        Hudson.getInstance().getJobListeners().add(new ItemListener() {
+        Hudson.getInstance().getExtensionList(ItemListener.class).add(new ItemListener() {
             @Override
             public void onLoaded() {
                 restoreQueue();
