@@ -9,9 +9,9 @@
   
   <artifactId>build-publisher</artifactId>
   <packaging>hpi</packaging>
-  <version>1.11</version>
+  <version>1.11-SNAPSHOT</version>
   <name>Hudson Build-Publisher plugin </name>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Build+Publisher+Plugin</url>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
 
   <developers>
     <developer>
@@ -21,9 +21,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/hudson/build-publisher-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:hudson/build-publisher-plugin.git</developerConnection>
-    <url>http://github.com/hudson/build-publisher-plugin</url>
+    <connection>scm:git:git://github.com/jenkinsci/build-publisher-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/build-publisher-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/build-publisher-plugin</url>
   </scm>
   
  <dependencies>
