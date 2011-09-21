@@ -9,7 +9,7 @@
   
   <artifactId>build-publisher</artifactId>
   <packaging>hpi</packaging>
-  <version>1.12-SNAPSHOT</version>
+  <version>1.11-SNAPSHOT</version>
   <name>Hudson Build-Publisher plugin </name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
 
@@ -37,22 +37,6 @@
       <artifactId>maven-plugin</artifactId>
     </dependency>
  </dependencies>
-
-<!-- get every artifact through maven.glassfish.org, which proxies all the 
-		artifacts that we need -->
-	<repositories>
-		<repository>
-			<id>m.g.o-public</id>
-			<url>http://maven.glassfish.org/content/groups/public/</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>m.g.o-public</id>
-			<url>http://maven.glassfish.org/content/groups/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
 
 
 </project>
