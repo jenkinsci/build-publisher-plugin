@@ -118,7 +118,6 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             load();
         }
 
-        @Override
         protected void convert(Map<String, Object> oldPropertyBag) {
             if (oldPropertyBag.containsKey("publicInstances"))
                 publicInstances = (HudsonInstance[]) oldPropertyBag
@@ -221,7 +220,6 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         return true;
     }
 
-    @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.BUILD;
     }
