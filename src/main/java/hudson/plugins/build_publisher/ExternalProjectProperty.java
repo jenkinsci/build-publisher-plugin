@@ -35,6 +35,8 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
+
 import hudson.triggers.TriggerDescriptor;
 
 /**
@@ -119,7 +121,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             oldBuildIDs.add(run.getId());
         }
 
-        File buildsDir = new File(project.getRootDir(), "builds");
+        File buildsDir = Jenkins.getInstance().getBuildDirFor(project);
         
         //Untar incoming builds unto the build directory
         Untar untar = new Untar();
