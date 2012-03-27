@@ -3,20 +3,16 @@
  */
 package hudson.plugins.build_publisher;
 
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.XmlFile;
+import hudson.model.Item;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
-import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.listeners.ItemListener;
 import hudson.plugins.build_publisher.StatusInfo.State;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.SimpleHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +24,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
+
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.params.HttpClientParams;
 
 /**
@@ -137,13 +141,24 @@ public final class HudsonInstance {
         //set SO_TIMEOUT to prevent thread hang-up
         params.setSoTimeout(10 * 60 * 1000);
         client = new HttpClient(params, connectionManager);
-        
+        loadProxy();
+
         // --- authentication
         
         //We don't use BASIC auth
         //setCredentialsFroClient(client);
     }
 
+    public void loadProxy(){
+        Jenkins j = Jenkins.getInstance();
+        ProxyConfiguration proxy = j!=null ? j.proxy : null;
+        if(proxy != null) {
+            client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+            if(proxy.getUserName() != null)
+                client.getState().setProxyCredentials(AuthScope.ANY,new UsernamePasswordCredentials(proxy.getUserName(),proxy.getPassword()));
+        }
+    }
+    
     /*package*/ void initPublisherThread() {
         if(publisherThread == null || !publisherThread.isAlive()) {
             publisherThread = new PublisherThread(HudsonInstance.this);

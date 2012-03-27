@@ -193,6 +193,12 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             return null;
         }
 
+        public void doReloadProxy(){
+            for (HudsonInstance server : publicInstances) {
+                server.loadProxy();
+            }
+        }
+        
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
