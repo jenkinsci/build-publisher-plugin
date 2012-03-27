@@ -1,42 +1,50 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.424</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
-  
-  <artifactId>build-publisher</artifactId>
-  <packaging>hpi</packaging>
-  <version>1.12-SNAPSHOT</version>
-  <name>Hudson Build-Publisher plugin </name>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>1.424</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-  <developers>
-    <developer>
-      <id>vjuranek</id>
-      <name>Vojtech Juranek</name>
-    </developer>
-  </developers>
+	<artifactId>build-publisher</artifactId>
+	<packaging>hpi</packaging>
+	<version>1.12-SNAPSHOT</version>
+	<name>Hudson Build-Publisher plugin </name>
+	<url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
 
-  <scm>
-    <connection>scm:git:git://github.com/jenkinsci/build-publisher-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/build-publisher-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/build-publisher-plugin</url>
-  </scm>
-  
- <dependencies>
-   <dependency>
-     <groupId>commons-httpclient</groupId>
-     <artifactId>commons-httpclient</artifactId>
-     <version>3.1</version>
-   </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>maven-plugin</artifactId>
-    </dependency>
- </dependencies>
+	<developers>
+		<developer>
+			<id>vjuranek</id>
+			<name>Vojtech Juranek</name>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/jenkinsci/build-publisher-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jenkinsci/build-publisher-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/build-publisher-plugin</url>
+	</scm>
+
+	<repositories>
+		<repository>
+			<id>repo.jenkins-ci.org</id>
+			<url>http://repo.jenkins-ci.org/public/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.main</groupId>
+			<artifactId>maven-plugin</artifactId>
+		</dependency>
+	</dependencies>
 
 
 </project>
