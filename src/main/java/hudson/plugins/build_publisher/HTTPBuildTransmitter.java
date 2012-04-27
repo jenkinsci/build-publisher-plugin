@@ -66,12 +66,13 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                 + encodeURI(jobUrl) + "/postBuild/acceptBuild");
 
         File tempFile = null;
+        OutputStream out = null;
         try {
 
             tempFile = File.createTempFile("hudson_bp", ".tar");
-            OutputStream out = new FileOutputStream(tempFile);
+            out = new FileOutputStream(tempFile);
             writeToTar(out, build);
-
+            
             method.setRequestEntity(new FileRequestEntity(tempFile,
                     "application/x-tar"));
             
@@ -97,6 +98,12 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
                 throw (e1);
             }
         } finally {
+            if(null != out)
+                try {
+                    out.close();
+                } catch(IOException e) {
+                    HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to close stream for file " + tempFile.getAbsolutePath());
+                }
             if (!tempFile.delete()) {
                 HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to delete temporary file "
                         + tempFile.getAbsolutePath()
