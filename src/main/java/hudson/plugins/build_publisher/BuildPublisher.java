@@ -145,7 +145,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             req.bindParameters(bp, "bp.");
 
             if (req.getParameter("publicLogrotate") != null) {
-                bp.logRotator = LogRotator.DESCRIPTOR.newInstance(req,formData);
+                bp.logRotator = LogRotator.DESCRIPTOR.newInstance(req,formData.getJSONObject("publicLogrotate"));
             } else {
                 bp.logRotator = null;
             }
