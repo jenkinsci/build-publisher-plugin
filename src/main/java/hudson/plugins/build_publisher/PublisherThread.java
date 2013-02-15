@@ -247,9 +247,7 @@ public class PublisherThread extends Thread {
 
     private void submitConfig(String submitConfigUrl, Job project)
             throws IOException, ServerFailureException {
-        PostMethod method = new PostMethod();
-        method.setURI(new org.apache.commons.httpclient.URI(submitConfigUrl,
-                                false));
+        PostMethod method = new PostMethod(submitConfigUrl);
         method.setRequestEntity(new FileRequestEntity(project.getConfigFile().getFile(),"text/xml"));
         executeMethod(method);
     }
