@@ -16,6 +16,7 @@ import hudson.model.Job;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -50,7 +51,15 @@ public class PublisherThread extends Thread {
             while (true) {
                 state = ThreadState.IDLE;
                 currentRequest = hudsonInstance.nextRequest();
-
+                AbstractProject project  = currentRequest.getProject();
+                if(project.getBuildByNumber(currentRequest.number)==null){ //was the buid deleted before publishing
+                    HudsonInstance.LOGGER.info("build does not exist " + currentRequest.getProject() + " build " + currentRequest.number);
+                    StatusInfo info= new StatusInfo(StatusInfo.State.INTERRUPTED,
+                                    "Build was removed",
+                                    hudsonInstance.getName(), null); 
+                    hudsonInstance.removeRequest(currentRequest, info);
+                    continue;
+                }
                 state = new ThreadState.Publishing(currentRequest);
                 
                 StatusAction.setBuildStatusAction(currentRequest,
@@ -63,7 +72,6 @@ public class PublisherThread extends Thread {
                     // Proceed transmission
                     
                     String publicHudsonUrl = hudsonInstance.getUrl();
-                    AbstractProject project  = currentRequest.getProject();
                     
                     if (project instanceof MatrixConfiguration) {
                         //We can't create remote parent project here (we might collide with another MatrixRun),
@@ -87,6 +95,19 @@ public class PublisherThread extends Thread {
                                     " Please create it (e.g. by publishing parent matrix build) and try again.",
                                     hudsonInstance.getName(), null)); 
                             
+                        }
+                        MatrixConfiguration configuration = (MatrixConfiguration) project;
+                        String configurationUrl = projectURL+"/"+ hudson.Util.rawEncode(configuration.getName());
+                        if(!urlExists(configurationUrl)){
+                            HudsonInstance.LOGGER.info("crateing config " + configuration.getName());
+                            PostMethod method = new PostMethod(projectURL+"/" + "postBuild/createConfiguration");
+                            method.addParameter("name", configuration.getName());
+                            executeMethod(method);
+                            Header responseHeader = method.getResponseHeader("X-configuration-created");
+                            if(responseHeader==null){
+                                HudsonInstance.LOGGER.warning("Failed to create configuration " + configuration.getName() + " for project " + project.getName());
+                            }
+                            submitConfig(configurationUrl +"/config.xml", configuration);
                         }
                     } else {
                         synchronizeProjectSettings(publicHudsonUrl,project);
@@ -265,9 +286,7 @@ public class PublisherThread extends Thread {
 
     private boolean urlExists(String url) throws ServerFailureException, IOException {
 
-        PostMethod method = new PostMethod();
-        method.setURI(new org.apache.commons.httpclient.URI(url,false));
-
+        PostMethod method = new PostMethod(url);
         try {
             executeMethod(method);
             return true;
