@@ -26,8 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import org.apache.commons.httpclient.HttpException;
@@ -45,7 +43,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             throws ServerFailureException {
 
         aborted = false;
-
         AbstractProject project = build.getProject();
         
         String jobUrl = "job/";
@@ -57,13 +54,13 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         } else if (project instanceof MatrixConfiguration) {
             jobUrl += ((MatrixConfiguration)project).getParent().getName()
                     + "/"
-                    + ((MatrixConfiguration)project).getCombination().toString();
+                    + Util.rawEncode(((MatrixConfiguration)project).getCombination().toString());
         } else {
             jobUrl += project.getName();
         }
 
         method = new PostMethod(hudsonInstance.getUrl()
-                + encodeURI(jobUrl) + "/postBuild/acceptBuild");
+                + jobUrl + "/postBuild/acceptBuild");
 
         File tempFile = null;
         OutputStream out = null;
@@ -276,15 +273,5 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
         in.close();
     }
-
-    public static String encodeURI(String uri) {
-        try {
-            return new URI(null,uri,null).toASCIIString();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return uri;
-        }
-    }
-
 
 }
