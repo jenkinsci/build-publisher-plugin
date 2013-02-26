@@ -208,7 +208,7 @@ public final class HudsonInstance {
     public synchronized List<AbstractBuild> getQueue() {
         return new ArrayList<AbstractBuild>(publishRequestQueue);
     }
-
+    
     /**
      * Gets the thread that does the publication.
      *
