@@ -38,6 +38,8 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletResponse;
+
 import jenkins.model.Jenkins;
 
 import hudson.triggers.TriggerDescriptor;
@@ -66,7 +68,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         return this;
     }
     
-    public void doCreateConfiguration(StaplerRequest req, StaplerResponse rsp){
+    public void doCreateConfiguration(StaplerRequest req, StaplerResponse rsp) throws IOException {
         project.checkPermission(Job.CONFIGURE);
         String configuration = req.getParameter("name");
         if(project instanceof MatrixProject){
@@ -81,15 +83,11 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
                 }
                 catch(IOException ex){
                     LOGGER.log(Level.WARNING, "Failed to create configuration " + configuration + " for matrix project " + project.getName(), ex);
-                }
-                
-            }
-            else{
-                LOGGER.log(Level.INFO, "Configuration " + configuration + " for matrix project " + project.getName() + " already exists");
+                }   
             }
         }
         else{
-            LOGGER.log(Level.INFO, "Project " + project.getName() + " is not instance of MatrixProject");
+            rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not a matirx job");
         }
     }
 
