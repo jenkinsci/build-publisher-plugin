@@ -1,6 +1,9 @@
 package hudson.plugins.build_publisher;
 
 import hudson.Util;
+import hudson.matrix.Combination;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixProject;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
@@ -61,6 +64,33 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
     public ProminentProjectAction getJobAction(Job<?, ?> job) {
         this.project = (AbstractProject) job;
         return this;
+    }
+    
+    public void doCreateConfiguration(StaplerRequest req, StaplerResponse rsp){
+        project.checkPermission(Job.CONFIGURE);
+        String configuration = req.getParameter("name");
+        if(project instanceof MatrixProject){
+            MatrixProject matrixProject = (MatrixProject) project;
+            MatrixConfiguration config = matrixProject.getItem(configuration);
+            if(config==null){
+                config = new MatrixConfiguration(matrixProject, Combination.fromString(configuration));
+                try{
+                    config.save();
+                    reloadProject(project);
+                    rsp.setHeader("X-configuration-created", config.getName());
+                }
+                catch(IOException ex){
+                    LOGGER.log(Level.WARNING, "Failed to create configuration " + configuration + " for matrix project " + project.getName(), ex);
+                }
+                
+            }
+            else{
+                LOGGER.log(Level.INFO, "Configuration " + configuration + " for matrix project " + project.getName() + " already exists");
+            }
+        }
+        else{
+            LOGGER.log(Level.INFO, "Project " + project.getName() + " is not instance of MatrixProject");
+        }
     }
 
     /**
