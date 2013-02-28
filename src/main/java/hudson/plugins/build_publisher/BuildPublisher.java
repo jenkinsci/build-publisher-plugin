@@ -16,6 +16,8 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.LogRotator;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.tasks.LogRotator.LRDescriptor;
+
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -23,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
+import jenkins.model.BuildDiscarder;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 /**
@@ -42,7 +47,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
     private LogRotator logRotator;
 
     private transient HudsonInstance publicHudsonInstance;
-
+    
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher,
             BuildListener listener) throws InterruptedException, IOException {
@@ -145,7 +150,8 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             req.bindParameters(bp, "bp.");
 
             if (req.getParameter("publicLogrotate") != null) {
-                bp.logRotator = LogRotator.DESCRIPTOR.newInstance(req,formData.getJSONObject("publicLogrotate"));
+                LRDescriptor desc = (LRDescriptor)Jenkins.getInstance().getDescriptor(LogRotator.class);
+                bp.logRotator = (LogRotator)desc.newInstance(req,formData.getJSONObject("publicLogrotate"));
             } else {
                 bp.logRotator = null;
             }

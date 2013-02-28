@@ -22,7 +22,8 @@
     <f:optionalBlock name="publicLogrotate"
       help="/help/project-config/log-rotation.html"
       title="${%Discard Old Builds}" checked="${instance.logRotator!=null}">
-      <st:include page="/hudson/tasks/LogRotator/config.jelly" it="${instance}" />
+      <j:set var="instance" value="${instance.logRotator}" />
+      <st:include page="config.jelly" class="hudson.tasks.LogRotator" />
     </f:optionalBlock>
   </f:advanced>
 <!--TODO: post actions -->
