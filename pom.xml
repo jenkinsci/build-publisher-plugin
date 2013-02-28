@@ -9,7 +9,7 @@
 
 	<artifactId>build-publisher</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.15</version>
+	<version>1.16-SNAPSHOT</version>
 	<name>Hudson Build-Publisher plugin </name>
 	<url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
 
