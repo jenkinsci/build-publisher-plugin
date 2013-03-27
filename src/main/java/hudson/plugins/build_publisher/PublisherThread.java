@@ -78,7 +78,7 @@ public class PublisherThread extends Thread {
                         //just check if it exists...
                         String projectURL = publicHudsonUrl + 
                                 "job/" + 
-                                ((MatrixConfiguration) project).getParent().getName();
+                                hudson.Util.rawEncode(((MatrixConfiguration) project).getParent().getName());
                         if (!urlExists(projectURL)) {
                             //...If not, stop here
                             HudsonInstance.LOGGER.log(Level.WARNING,
@@ -221,23 +221,23 @@ public class PublisherThread extends Thread {
                 
         if (project instanceof MavenModuleSet) {
             //if this is main maven project, synchronize also its modules
-            String parentURL = publicHudson + "job/" + project.getName();
+            String parentURL = publicHudson + "job/" + hudson.Util.rawEncode(project.getName());
             
             for(MavenModule module: ((MavenModuleSet) project).getItems()) {
                 String moduleModuleSystemName = module
                     .getModuleName().toFileSystemName();
                 
                 submitConfig(parentURL + "/postBuild/acceptMavenModule?name="
-                        + moduleModuleSystemName, module);
+                        + hudson.Util.rawEncode(moduleModuleSystemName), module);
             }
         } else if(project instanceof MatrixProject) {
             //Synchronize active matrix configurarions
-            String parentURL = publicHudson + "job/" + project.getName();
+            String parentURL = publicHudson + "job/" + hudson.Util.rawEncode(project.getName());
             for(MatrixConfiguration configuration: ((MatrixProject) project).getActiveConfigurations()) {
                     submitConfig(parentURL+"/"+ hudson.Util.rawEncode(configuration.getName()) +"/config.xml", configuration);
             }
         } else if(project instanceof ItemGroup) {
-            String parentURL = publicHudson + "job/" + project.getName();
+            String parentURL = publicHudson + "job/" + hudson.Util.rawEncode(project.getName());
             for(Object item: ((ItemGroup) project).getItems()) {
                 if(item instanceof Job) {
                     Job job = (Job) item;
@@ -251,13 +251,13 @@ public class PublisherThread extends Thread {
     private void createOrSynchronize(String publicHudson,
             AbstractProject project) throws IOException, ServerFailureException {
 
-        String projectURL = publicHudson + "job/" + project.getName();
+        String projectURL = publicHudson + "job/" + hudson.Util.rawEncode(project.getName());
         String submitConfigUrl;
 
         if (!urlExists(projectURL)) {
             // if the project doesn't exist, create it
             submitConfigUrl = publicHudson + "createItem?name="
-                    + project.getName();
+                    + hudson.Util.rawEncode(project.getName());
         } else {
             // otherwise just synchronize config file
             submitConfigUrl = projectURL + "/config.xml";

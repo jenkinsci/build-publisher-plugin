@@ -47,16 +47,15 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         
         String jobUrl = "job/";
         if (project instanceof MavenModule) {
-            jobUrl += ((MavenModule) project).getParent().getName()
+            jobUrl += hudson.Util.rawEncode(((MavenModule) project).getParent().getName())
                     + "/"
-                    + ((MavenModule) project).getModuleName()
-                            .toFileSystemName();
+                    + hudson.Util.rawEncode(((MavenModule) project).getModuleName().toFileSystemName());
         } else if (project instanceof MatrixConfiguration) {
-            jobUrl += ((MatrixConfiguration)project).getParent().getName()
+            jobUrl += hudson.Util.rawEncode(((MatrixConfiguration)project).getParent().getName())
                     + "/"
                     + Util.rawEncode(((MatrixConfiguration)project).getCombination().toString());
         } else {
-            jobUrl += project.getName();
+            jobUrl += hudson.Util.rawEncode(project.getName());
         }
 
         method = new PostMethod(hudsonInstance.getUrl()

@@ -188,6 +188,10 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         public HudsonInstance[] getPublicInstances() {
             return publicInstances;
         }
+        
+        public void setPublicInstances(HudsonInstance[] instaces){
+            this.publicInstances = instaces;
+        }
 
         public HudsonInstance getHudsonInstanceForName(String name) {
             for (HudsonInstance server : publicInstances) {
