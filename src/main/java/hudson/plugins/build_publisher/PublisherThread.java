@@ -289,6 +289,11 @@ public class PublisherThread extends Thread {
             executeMethod(method);
             return true;
         } catch (ServerFailureException e) {
+            // check, if method was executed, see JENKINS-17944
+            if(e.getMethod().getStatusLine() == null) {
+                throw e;
+            }
+            
             int statusCode = e.getMethod().getStatusCode();
             if ((statusCode == 400) || (statusCode == 404))
                 return false;
