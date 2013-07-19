@@ -11,7 +11,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
@@ -29,6 +28,9 @@ import java.io.OutputStream;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 
 /**
  * Sends build result via HTTP protocol.
@@ -135,40 +137,17 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
      */
     static HttpMethod executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws ServerFailureException {
-        hudsonInstance.getHttpClient().getState().clear();
-        if ((hudsonInstance.requiresAuthentication())) {
-            // We need to get authenticated.
-            // On some containers and depending on the security configuration,
-            // simply sending HTTP BASIC auth would work, but in legacy authentication
-            // with some containers in particular, the behavior tends to be
-            // different.
-            // So while lengthy, let's emulate the user behavior when
-            // they clock the login link, which is most stable across different
-            // environment
-            GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
-                    + "loginEntry");
-            followRedirects(loginMethod, hudsonInstance);
-
-            try {
-                login("j_security_check", hudsonInstance);
-            } catch (ServerFailureException e) {
-                // Here if the servlet authentication is not available.
-                login("j_acegi_security_check", hudsonInstance);
-            }
+        HttpClient client = hudsonInstance.getHttpClient();
+        HttpState state = client.getState();
+        state.clear();
+        if (hudsonInstance.requiresAuthentication()) {
+            client.getParams().setAuthenticationPreemptive(true); // Jenkins does not generally prompt for BASIC auth
+            state.setCredentials(/* TODO could be stricter */AuthScope.ANY, new UsernamePasswordCredentials(hudsonInstance.getLogin(), hudsonInstance.getPassword()));
         }
 
         return followRedirects(method, hudsonInstance);
     }
     
-    private static void login(String type, HudsonInstance hudsonInstance)
-            throws ServerFailureException {
-        PostMethod servletSecurityMethod = new PostMethod(hudsonInstance.getUrl() + type);
-        servletSecurityMethod.addParameter("j_username", hudsonInstance.getLogin());
-        servletSecurityMethod.addParameter("j_password", hudsonInstance.getPassword());
-        servletSecurityMethod.addParameter("action", "login");
-        followRedirects(servletSecurityMethod, hudsonInstance);
-    }
-
     // see executeMethod for contracts
     private static HttpMethod followRedirects(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws ServerFailureException {

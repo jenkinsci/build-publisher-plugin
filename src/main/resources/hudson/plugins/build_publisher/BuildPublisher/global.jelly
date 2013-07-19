@@ -17,8 +17,9 @@
           <f:entry title="Login" help="/plugin/build-publisher/help/global/login.html">
             <f:textbox name="bp.login" value="${serv.getLogin()}"/>
           </f:entry>
-        
-          <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
+
+          <!-- TODO convenience hyperlink to open ${url}/user/${login}/configure where the API token is displayed -->
+          <f:entry title="API Token" help="/plugin/build-publisher/help/global/password.html">
             <input class="setting-input" name="bp.password"
                    type="password" value="${serv.getPassword()}"/>
           </f:entry>
