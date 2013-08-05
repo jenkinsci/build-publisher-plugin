@@ -47,7 +47,9 @@ public final class HudsonInstance {
     private String url;
     private String name;
     private String login;
+    @Deprecated
     private String password;
+    private String authToken;
 
     // Builds to be published
     private transient LinkedHashSet<AbstractBuild> publishRequestQueue = new LinkedHashSet<AbstractBuild>();
@@ -60,19 +62,25 @@ public final class HudsonInstance {
         return login;
     }
 
+    @Deprecated
     public String getPassword() {
         return password;
+    }
+    
+    public String getAuthToken() {
+        return authToken;
     }
 
     public boolean requiresAuthentication() {
         return Util.fixEmpty(login)!=null;
     }
 
-    public HudsonInstance(String name, String url, String login, String password) {
+    public HudsonInstance(String name, String url, String login, String password, String authToken) {
         this.name = name;
         this.url = url;
         this.login = login;
         this.password = password;
+        this.authToken = authToken;
 
         initVariables();
         restoreQueue();

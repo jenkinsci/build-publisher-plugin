@@ -164,6 +164,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             String[] urls = req.getParameterValues("bp.url");
             String[] logins = req.getParameterValues("bp.login");
             String[] passwords = req.getParameterValues("bp.password");
+            String[] authTokens = req.getParameterValues("bp.authToken");
 
             List<HudsonInstance> servers = new ArrayList<HudsonInstance>();
             for (int i = 0; i < names.length; i++) {
@@ -173,7 +174,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
                 if (names[i].length() == 0) {
                     names[i] = urls[i];
                 }
-                servers.add(new HudsonInstance(names[i], urls[i], logins[i], passwords[i]));
+                servers.add(new HudsonInstance(names[i], urls[i], logins[i], passwords[i], authTokens[i]));
             }
 
             this.publicInstances = servers.toArray(new HudsonInstance[0]);

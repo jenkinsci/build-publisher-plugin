@@ -6,17 +6,6 @@ import hudson.matrix.MatrixConfiguration;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.FileRequestEntity;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarOutputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -28,38 +17,49 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TimeZone;
 import java.util.logging.Level;
+
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.FileRequestEntity;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarOutputStream;
 
 /**
  * Sends build result via HTTP protocol.
- *
+ * 
  */
 public class HTTPBuildTransmitter implements BuildTransmitter {
 
     private PostMethod method;
     private boolean aborted = false;
 
-    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance)
-            throws ServerFailureException {
+    public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance) throws ServerFailureException {
 
         aborted = false;
         AbstractProject project = build.getProject();
-        
+
         String jobUrl = "job/";
         if (project instanceof MavenModule) {
-            jobUrl += hudson.Util.rawEncode(((MavenModule) project).getParent().getName())
-                    + "/"
+            jobUrl += hudson.Util.rawEncode(((MavenModule) project).getParent().getName()) + "/"
                     + hudson.Util.rawEncode(((MavenModule) project).getModuleName().toFileSystemName());
         } else if (project instanceof MatrixConfiguration) {
-            jobUrl += hudson.Util.rawEncode(((MatrixConfiguration)project).getParent().getName())
-                    + "/"
-                    + Util.rawEncode(((MatrixConfiguration)project).getCombination().toString());
+            jobUrl += hudson.Util.rawEncode(((MatrixConfiguration) project).getParent().getName()) + "/"
+                    + Util.rawEncode(((MatrixConfiguration) project).getCombination().toString());
         } else {
             jobUrl += hudson.Util.rawEncode(project.getName());
         }
 
-        method = new PostMethod(hudsonInstance.getUrl()
-                + jobUrl + "/postBuild/acceptBuild");
+        method = new PostMethod(hudsonInstance.getUrl() + jobUrl + "/postBuild/acceptBuild");
 
         File tempFile = null;
         OutputStream out = null;
@@ -68,41 +68,39 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             tempFile = File.createTempFile("hudson_bp", ".tar");
             out = new FileOutputStream(tempFile);
             writeToTar(out, build);
-            
-            method.setRequestEntity(new FileRequestEntity(tempFile,
-                    "application/x-tar"));
-            
+
+            method.setRequestEntity(new FileRequestEntity(tempFile, "application/x-tar"));
+
             method.setRequestHeader("X-Publisher-Timezone", TimeZone.getDefault().getID());
             method.setRequestHeader("X-Build-ID", build.getId());
 
             executeMethod(method, hudsonInstance);
-            
-            //Check if remote side really accepted the build
+
+            // Check if remote side really accepted the build
             Header responseHeader = method.getResponseHeader("X-Build-Recieved");
-            if((responseHeader == null) || 
-                    !project.getName().equals(responseHeader.getValue().trim())) {
-                    throw new HttpException("Remote instance didn't confirm recieving this build");
+            if ((responseHeader == null) || !project.getName().equals(responseHeader.getValue().trim())) {
+                throw new HttpException("Remote instance didn't confirm recieving this build");
             }
-            
+
         } catch (IOException e) {
             // May be caused by premature call of HttpMethod.abort()
             if (!aborted) {
-                throw new ServerFailureException(method,e);
+                throw new ServerFailureException(method, e);
             }
         } catch (RuntimeException e1) {
             if (!aborted) {
                 throw (e1);
             }
         } finally {
-            if(null != out)
+            if (null != out)
                 try {
                     out.close();
-                } catch(IOException e) {
-                    HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to close stream for file " + tempFile.getAbsolutePath());
+                } catch (IOException e) {
+                    HudsonInstance.LOGGER.log(Level.SEVERE,
+                            "Failed to close stream for file " + tempFile.getAbsolutePath());
                 }
             if (!tempFile.delete()) {
-                HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to delete temporary file "
-                        + tempFile.getAbsolutePath()
+                HudsonInstance.LOGGER.log(Level.SEVERE, "Failed to delete temporary file " + tempFile.getAbsolutePath()
                         + ". Please delete the file manually.");
             }
         }
@@ -117,51 +115,54 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
     }
 
     /**
-     * Executes the given method, with authenticates if necessary,
-     * and follow any redirects.
-     *
-     * @return
-     *      Final {@link HttpMethod} that successfully executed,
-     *      after possible redirects. The status code of this is always &lt;300 because
-     *      this method handles redirection and errors are thrown as exceptions.
-     *
-     *      <p>
-     *      The return value is useful if the caller wants to read the response.
-     *
+     * Executes the given method, with authenticates if necessary, and follow any redirects.
+     * 
+     * @return Final {@link HttpMethod} that successfully executed, after possible redirects. The status code of this is
+     *         always &lt;300 because this method handles redirection and errors are thrown as exceptions.
+     * 
+     *         <p>
+     *         The return value is useful if the caller wants to read the response.
+     * 
      * @throws ServerFailureException
-     *      If we encounter >400 error code from the server.
+     *             If we encounter >400 error code from the server.
      * @throws IOException
-     *      Other generic communication exception.
+     *             Other generic communication exception.
      */
-    static HttpMethod executeMethod(HttpMethodBase method,
-            HudsonInstance hudsonInstance) throws ServerFailureException {
-        hudsonInstance.getHttpClient().getState().clear();
+    static HttpMethod executeMethod(HttpMethodBase method, HudsonInstance hudsonInstance) throws ServerFailureException {
+        HttpClient client = hudsonInstance.getHttpClient();
+        HttpState state = client.getState();
+        state.clear();
         if ((hudsonInstance.requiresAuthentication())) {
-            // We need to get authenticated.
-            // On some containers and depending on the security configuration,
-            // simply sending HTTP BASIC auth would work, but in legacy authentication
-            // with some containers in particular, the behavior tends to be
-            // different.
-            // So while lengthy, let's emulate the user behavior when
-            // they clock the login link, which is most stable across different
-            // environment
-            GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
-                    + "loginEntry");
-            followRedirects(loginMethod, hudsonInstance);
+            if (Util.fixEmpty(hudsonInstance.getAuthToken()) != null) {
+                client.getParams().setAuthenticationPreemptive(true); // Jenkins does not generally prompt for BASIC
+                                                                      // auth
+                state.setCredentials(/* TODO could be stricter */AuthScope.ANY, new UsernamePasswordCredentials(
+                        hudsonInstance.getLogin(), hudsonInstance.getAuthToken()));
+            } else { //backward compatible approach
+                // We need to get authenticated.
+                // On some containers and depending on the security configuration,
+                // simply sending HTTP BASIC auth would work, but in legacy authentication
+                // with some containers in particular, the behavior tends to be
+                // different.
+                // So while lengthy, let's emulate the user behavior when
+                // they clock the login link, which is most stable across different
+                // environment
+                GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl() + "loginEntry");
+                followRedirects(loginMethod, hudsonInstance);
 
-            try {
-                login("j_security_check", hudsonInstance);
-            } catch (ServerFailureException e) {
-                // Here if the servlet authentication is not available.
-                login("j_acegi_security_check", hudsonInstance);
+                try {
+                    login("j_security_check", hudsonInstance);
+                } catch (ServerFailureException e) {
+                    // Here if the servlet authentication is not available.
+                    login("j_acegi_security_check", hudsonInstance);
+                }
             }
         }
 
         return followRedirects(method, hudsonInstance);
     }
-    
-    private static void login(String type, HudsonInstance hudsonInstance)
-            throws ServerFailureException {
+
+    private static void login(String type, HudsonInstance hudsonInstance) throws ServerFailureException {
         PostMethod servletSecurityMethod = new PostMethod(hudsonInstance.getUrl() + type);
         servletSecurityMethod.addParameter("j_username", hudsonInstance.getLogin());
         servletSecurityMethod.addParameter("j_password", hudsonInstance.getPassword());
@@ -170,28 +171,27 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
     }
 
     // see executeMethod for contracts
-    private static HttpMethod followRedirects(HttpMethodBase method,
-            HudsonInstance hudsonInstance) throws ServerFailureException {
+    private static HttpMethod followRedirects(HttpMethodBase method, HudsonInstance hudsonInstance)
+            throws ServerFailureException {
         int statusCode;
         HttpClient client = hudsonInstance.getHttpClient();
         try {
             statusCode = client.executeMethod(method);
-
-            if(statusCode<300)
+          
+            if (statusCode < 300)
                 return method;
-            if(statusCode<400) {
+            if (statusCode < 400) {
                 Header locationHeader = method.getResponseHeader("location");
                 if (locationHeader != null) {
                     String redirectLocation = locationHeader.getValue();
-                    method.setURI(new org.apache.commons.httpclient.URI(/*method.getURI(),*/ redirectLocation,
-                                    true));
+                    method.setURI(new org.apache.commons.httpclient.URI( method.getURI(), redirectLocation, true));
                     return followRedirects(method, hudsonInstance);
                 }
             }
 
             // failure
             throw new ServerFailureException(method);
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             throw new ServerFailureException(method, ioe);
         } finally {
             method.releaseConnection();
@@ -200,13 +200,12 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
     /**
      * Writes to a tar stream and stores obtained files to the base dir.
-     *
+     * 
      * @return number of files/directories that are written.
      */
     // most of this is taken from somewhere of Hudson code. Perhaps it would be
     // good idea to put it in one place.
-    private Integer writeToTar(OutputStream out, AbstractBuild build)
-            throws IOException {
+    private Integer writeToTar(OutputStream out, AbstractBuild build) throws IOException {
         File buildDir = build.getRootDir();
         File baseDir = buildDir.getParentFile();
         String buildXmlFile = buildDir.getName() + "/build.xml";
@@ -220,8 +219,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         TarOutputStream tar = new TarOutputStream(new BufferedOutputStream(out));
         tar.setLongFileMode(TarOutputStream.LONGFILE_GNU);
 
-        DirectoryScanner dirScanner = fileSet
-                .getDirectoryScanner(new org.apache.tools.ant.Project());
+        DirectoryScanner dirScanner = fileSet.getDirectoryScanner(new org.apache.tools.ant.Project());
         String[] files = dirScanner.getIncludedFiles();
         for (String fileName : files) {
 
@@ -236,24 +234,22 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             File file = new File(baseDir, fileName);
 
             if (!file.isDirectory()) {
-                writeStreamToTar(tar, new FileInputStream(file), fileName, file
-                        .length(), buffer);
+                writeStreamToTar(tar, new FileInputStream(file), fileName, file.length(), buffer);
             }
         }
 
         File buildFile = new File(build.getRootDir(), "build.xml");
         String buildXml = Util.loadFile(buildFile);
         byte[] bytes = buildXml.getBytes();
-        writeStreamToTar(tar, new ByteArrayInputStream(bytes), buildXmlFile,
-                bytes.length, buffer);
+        writeStreamToTar(tar, new ByteArrayInputStream(bytes), buildXmlFile, bytes.length, buffer);
 
         tar.close();
 
         return files.length;
     }
 
-    private void writeStreamToTar(TarOutputStream tar, InputStream in,
-            String fileName, long length, byte[] buf) throws IOException {
+    private void writeStreamToTar(TarOutputStream tar, InputStream in, String fileName, long length, byte[] buf)
+            throws IOException {
         TarEntry te = new TarEntry(fileName);
         te.setSize(length);
 

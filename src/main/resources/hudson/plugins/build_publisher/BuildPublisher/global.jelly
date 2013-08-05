@@ -18,10 +18,18 @@
             <f:textbox name="bp.login" value="${serv.getLogin()}"/>
           </f:entry>
         
-          <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
-            <input class="setting-input" name="bp.password"
-                   type="password" value="${serv.getPassword()}"/>
+          <f:entry title="User auth token" help="/plugin/build-publisher/help/global/tokenAPI.html">
+            <input class="setting-input" name="bp.authToken"
+                   type="password" value="${serv.getAuthToken()}"/>
           </f:entry>
+        
+          <j:if test="${(hudson.Util.fixEmpty(serv.getLogin()) ne null) and (hudson.Util.fixEmpty(serv.getAuthToken()) eq null)}">
+            <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
+                <input class="setting-input" name="bp.password"
+                       type="hidden" value="${serv.getPassword()}"/>
+                <div class="error"><img src="${imagesURL}/none.gif" height="16" width="1" />Please setup authentication <a href="${serv.getUrl() + '/user/' + serv.getLogin() + '/configure'}">token API</a> instead of password, password usage is deprecated!</div>
+            </f:entry>
+          </j:if>
 
           <f:entry>
             <div align="right">

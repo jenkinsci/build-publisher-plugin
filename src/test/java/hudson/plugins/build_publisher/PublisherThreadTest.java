@@ -147,7 +147,7 @@ public class PublisherThreadTest {
       internalPublisher = new BuildPublisher();
       internalDescriptor = (BuildPublisherDescriptor) internalPublisher.getDescriptor();
       HudsonInstance instances[] = new HudsonInstance[1];
-      HudsonInstance instance = new HudsonInstance("Public jenkins", publicJenkinsURL.toString(), null, null);
+      HudsonInstance instance = new HudsonInstance("Public jenkins", publicJenkinsURL.toString(), null, null, null);
       instances[0]=instance;
       internalDescriptor.setPublicInstances(instances);
   }
