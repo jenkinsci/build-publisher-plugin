@@ -146,7 +146,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             // they clock the login link, which is most stable across different
             // environment
             GetMethod loginMethod = new GetMethod(hudsonInstance.getUrl()
-                    + "loginEntry");
+                    + "login");
             followRedirects(loginMethod, hudsonInstance);
 
             try {
