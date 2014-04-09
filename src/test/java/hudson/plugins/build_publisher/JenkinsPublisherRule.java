@@ -4,8 +4,8 @@
  */
 package hudson.plugins.build_publisher;
 
-import hudson.model.Hudson;
 import jenkins.model.Jenkins;
+
 import org.jvnet.hudson.test.JenkinsRule;
 import org.powermock.reflect.Whitebox;
 
@@ -20,7 +20,7 @@ public class JenkinsPublisherRule extends JenkinsRule{
         Whitebox.setInternalState(jenkins, "theInstance", null, Jenkins.class);
     }
     
-    public void after() {
+    public void after() throws Exception {
         Whitebox.setInternalState(jenkins, "theInstance", jenkins, Jenkins.class);
         super.after();
         Whitebox.setInternalState(jenkins, "theInstance", null, Jenkins.class);
