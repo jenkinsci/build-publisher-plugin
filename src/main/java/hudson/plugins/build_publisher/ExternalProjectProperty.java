@@ -10,13 +10,16 @@ import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Project;
 import hudson.model.ProminentProjectAction;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.AbstractBuild;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.LogRotator;
 import hudson.util.IOException2;
+import hudson.util.LogTaskListener;
 import net.sf.json.JSONObject;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.Untar;
@@ -168,13 +171,17 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         LOGGER.info("Got remote timezone " + publisherTimezoneID);
         TimeZone publisherTimezone = null;
         String buildId = null;
+        String buildNumber = null;
         String newId = null;
+        String symId = null;
         DateFormat dateFormatter = null;
         DateFormat oldDateFormatter = null;
         if(publisherTimezoneID!=null) {
        	    publisherTimezone = TimeZone.getTimeZone(publisherTimezoneID);
             dateFormatter = Run.getIDFormatter();
             buildId = (String)req.getHeader("X-Build-ID");
+            buildNumber = (String)req.getHeader("X-Build-Number");
+            symId = buildId;
             oldDateFormatter = (DateFormat)dateFormatter.clone();
             oldDateFormatter.setTimeZone(publisherTimezone);
             LOGGER.fine("Local timezone " + dateFormatter.getTimeZone());
@@ -187,6 +194,7 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
                                 LOGGER.fine("Original build time " + oldDateFormatter.parse(buildId));
 	        		newId = dateFormatter.format(oldDateFormatter.parse(buildId));
                                 LOGGER.fine("New build ID " + newId);
+                    symId = newId;
 	        	} catch (ParseException e) {
 	        		throw new BuildException("Failed to parse buildId", e);
 	        	}
@@ -221,7 +229,53 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             //Update next build number
             Run lastBuild = project.getLastBuild();
             int nextBuildNumber = (lastBuild != null ? lastBuild.number : 0) + 1;
-            project.updateNextBuildNumber(nextBuildNumber);            
+            project.updateNextBuildNumber(nextBuildNumber);
+
+            //Update build symlink
+            Util.createSymlink(buildsDir, symId, buildNumber, new LogTaskListener(LOGGER, Level.INFO));
+
+            //Update permalink symlinks
+            if (lastBuild.getResult() == Result.SUCCESS) {
+                Run<?,?> bid = project.getLastStableBuild();
+                if (bid != null) {
+                    if(Integer.parseInt(buildNumber) >= bid.number){
+                        Util.createSymlink(buildsDir, buildNumber, "lastStableBuild", new LogTaskListener(LOGGER, Level.INFO));
+                    }
+                }
+            }
+            if (lastBuild.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
+                Run<?,?> bid = project.getLastSuccessfulBuild();
+                if (bid != null) {
+                    if(Integer.parseInt(buildNumber) >= bid.number){
+                        Util.createSymlink(buildsDir, buildNumber, "lastSuccessfulBuild", new LogTaskListener(LOGGER, Level.INFO));
+                    }
+                }
+            }
+            if (lastBuild.getResult() == Result.FAILURE) {
+                Run<?,?> bid = project.getLastFailedBuild();
+                if (bid != null) {
+                    if(Integer.parseInt(buildNumber) >= bid.number){
+                        Util.createSymlink(buildsDir, buildNumber, "lastFailedBuild", new LogTaskListener(LOGGER, Level.INFO));
+                    }
+                }
+            }
+            if (lastBuild.getResult() == Result.UNSTABLE) {
+                Run<?,?> bid = project.getLastUnstableBuild();
+                if (bid != null) {
+                    if(Integer.parseInt(buildNumber) >= bid.number){
+                        Util.createSymlink(buildsDir, buildNumber, "lastUnstableBuild", new LogTaskListener(LOGGER, Level.INFO));
+                    }
+                }
+            }
+            if (lastBuild.getResult() != Result.SUCCESS) {
+                Run<?,?> bid = project.getLastUnsuccessfulBuild();
+                if (bid != null) {
+                    if(Integer.parseInt(buildNumber) >= bid.number){
+                        Util.createSymlink(buildsDir, buildNumber, "lastUnsuccessfulBuild", new LogTaskListener(LOGGER, Level.INFO));
+                    }
+                }
+            }
+
             //Add confirmation header
             rsp.addHeader("X-Build-Recieved",project.getName());
             try {

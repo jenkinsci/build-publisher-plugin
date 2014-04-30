@@ -74,6 +74,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             
             method.setRequestHeader("X-Publisher-Timezone", TimeZone.getDefault().getID());
             method.setRequestHeader("X-Build-ID", build.getId());
+            method.setRequestHeader("X-Build-Number", String.valueOf(build.getNumber()));
 
             executeMethod(method, hudsonInstance);
             
