@@ -6,6 +6,7 @@ import hudson.matrix.MatrixConfiguration;
 import hudson.maven.MavenModule;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -13,6 +14,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.tar.TarEntry;
@@ -35,6 +37,8 @@ import org.apache.commons.httpclient.HttpException;
  */
 public class HTTPBuildTransmitter implements BuildTransmitter {
 
+    private static boolean useCrumbs = true;
+
     private PostMethod method;
     private boolean aborted = false;
 
@@ -43,7 +47,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
         aborted = false;
         AbstractProject project = build.getProject();
-        
+
         String jobUrl = "job/";
         if (project instanceof MavenModule) {
             jobUrl += hudson.Util.rawEncode(((MavenModule) project).getParent().getName())
@@ -67,21 +71,21 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             tempFile = File.createTempFile("hudson_bp", ".tar");
             out = new FileOutputStream(tempFile);
             writeToTar(out, build);
-            
+
             method.setRequestEntity(new FileRequestEntity(tempFile,
                     "application/x-tar"));
-            
+
             method.setRequestHeader("X-Build-Number", String.valueOf(build.getNumber()));
 
             executeMethod(method, hudsonInstance);
-            
+
             //Check if remote side really accepted the build
             Header responseHeader = method.getResponseHeader("X-Build-Recieved");
-            if((responseHeader == null) || 
+            if((responseHeader == null) ||
                     !project.getName().equals(responseHeader.getValue().trim())) {
                     throw new HttpException("Remote instance didn't confirm recieving this build");
             }
-            
+
         } catch (IOException e) {
             // May be caused by premature call of HttpMethod.abort()
             if (!aborted) {
@@ -128,8 +132,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
      *
      * @throws ServerFailureException
      *      If we encounter >400 error code from the server.
-     * @throws IOException
-     *      Other generic communication exception.
      */
     static HttpMethod executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws ServerFailureException {
@@ -166,7 +168,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
         return followRedirects(method, hudsonInstance);
     }
-    
+
     private static void login(String type, HudsonInstance hudsonInstance)
             throws ServerFailureException {
         PostMethod servletSecurityMethod = new PostMethod(hudsonInstance.getUrl() + type);
@@ -176,12 +178,40 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         followRedirects(servletSecurityMethod, hudsonInstance);
     }
 
+    private static Header getCrumbHeader(HudsonInstance hudsonInstance, HttpClient client) {
+        Header crumbHeader = null;
+
+        String crumbProvider = hudsonInstance.getUrl() + "crumbIssuer/api/json";
+        GetMethod method = new GetMethod(crumbProvider);
+
+        try {
+            client.executeMethod(method);
+            String result = IOUtils.toString(method.getResponseBodyAsStream(), "UTF8");
+            JSONObject js = JSONObject.fromObject(result);
+
+            crumbHeader = new Header(js.getString("crumbRequestField"), js.getString("crumb"));
+        } catch (Exception e) {
+            // If getting the crumb fails disable crumb support. Not all instances have crumbs enabled
+            useCrumbs = false;
+        } finally {
+            method.releaseConnection();
+        }
+
+        return crumbHeader;
+    }
+
     // see executeMethod for contracts
     private static HttpMethod followRedirects(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws ServerFailureException {
         int statusCode;
         HttpClient client = hudsonInstance.getHttpClient();
         try {
+            if(useCrumbs) {
+                Header crumbHeader = getCrumbHeader(hudsonInstance, client);
+                if(crumbHeader != null) {
+                    method.setRequestHeader(crumbHeader);
+                }
+            }
             statusCode = client.executeMethod(method);
 
             if(statusCode<300)
