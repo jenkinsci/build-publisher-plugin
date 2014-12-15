@@ -10,7 +10,6 @@ import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Project;
 import hudson.model.ProminentProjectAction;
 import hudson.model.Result;
@@ -31,13 +30,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -167,51 +161,10 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
         	removeTriggers(project);
         }
 
-        String publisherTimezoneID = (String)req.getHeader("X-Publisher-Timezone");
-        LOGGER.info("Got remote timezone " + publisherTimezoneID);
-        TimeZone publisherTimezone = null;
-        String buildId = null;
-        String buildNumber = null;
-        String newId = null;
-        String symId = null;
-        DateFormat dateFormatter = null;
-        DateFormat oldDateFormatter = null;
-        if(publisherTimezoneID!=null) {
-       	    publisherTimezone = TimeZone.getTimeZone(publisherTimezoneID);
-            dateFormatter = Run.getIDFormatter();
-            buildId = (String)req.getHeader("X-Build-ID");
-            buildNumber = (String)req.getHeader("X-Build-Number");
-            symId = buildId;
-            oldDateFormatter = (DateFormat)dateFormatter.clone();
-            oldDateFormatter.setTimeZone(publisherTimezone);
-            LOGGER.fine("Local timezone " + dateFormatter.getTimeZone());
-            LOGGER.fine("Remote timezone " + publisherTimezone);
-        }
+        String buildNumber = req.getHeader("X-Build-Number");
         
         try {
-        	if(publisherTimezone!=null) {
-	        	try {
-                                LOGGER.fine("Original build time " + oldDateFormatter.parse(buildId));
-	        		newId = dateFormatter.format(oldDateFormatter.parse(buildId));
-                                LOGGER.fine("New build ID " + newId);
-                    symId = newId;
-	        	} catch (ParseException e) {
-	        		throw new BuildException("Failed to parse buildId", e);
-	        	}
-        	}
-        	
             untar.execute();
-            
-            if(publisherTimezone!=null) {
-	            File oldBuildDir = new File(buildsDir, buildId);
-	            File newBuildDir = new File(buildsDir, newId);
-	            
-	            LOGGER.info("Renaming: " + oldBuildDir.getCanonicalPath() + " to " + newBuildDir.getCanonicalPath());
-	            
-	            oldBuildDir.renameTo(newBuildDir);
-            } else {
-                LOGGER.info("No remote timezone found");
-            }
             
             //Load incoming builds from disk
             reloadProject(project);
@@ -230,9 +183,6 @@ public class ExternalProjectProperty extends JobProperty<Job<?, ?>> implements
             Run lastBuild = project.getLastBuild();
             int nextBuildNumber = (lastBuild != null ? lastBuild.number : 0) + 1;
             project.updateNextBuildNumber(nextBuildNumber);
-
-            //Update build symlink
-            Util.createSymlink(buildsDir, symId, buildNumber, new LogTaskListener(LOGGER, Level.INFO));
 
             //Update permalink symlinks
             if (lastBuild.getResult() == Result.SUCCESS) {

@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import org.apache.commons.httpclient.HttpException;
 
@@ -72,8 +71,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             method.setRequestEntity(new FileRequestEntity(tempFile,
                     "application/x-tar"));
             
-            method.setRequestHeader("X-Publisher-Timezone", TimeZone.getDefault().getID());
-            method.setRequestHeader("X-Build-ID", build.getId());
             method.setRequestHeader("X-Build-Number", String.valueOf(build.getNumber()));
 
             executeMethod(method, hudsonInstance);
