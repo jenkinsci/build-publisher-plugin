@@ -5,20 +5,18 @@ import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
-import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.LogRotator;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.tasks.LogRotator;
 import hudson.tasks.LogRotator.LRDescriptor;
-
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,9 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import jenkins.model.BuildDiscarder;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * {@link Publisher} responsible for submitting build results to public Hudson
@@ -38,7 +37,7 @@ import net.sf.json.JSONObject;
  *
  */
 public class BuildPublisher extends Notifier implements MatrixAggregatable {
-    
+
     private String serverName;
     private String notificationRecipients;
     private boolean publishUnstableBuilds;
@@ -47,7 +46,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
     private LogRotator logRotator;
 
     private transient HudsonInstance publicHudsonInstance;
-    
+
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher,
             BuildListener listener) throws InterruptedException, IOException {
@@ -57,7 +56,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
                         .getResult()))) {
             return true;
         }
-        
+
         //MatrixRun and MavenBuild can be published only after its parent build
         if(build.getProject().getParent() != Hudson.getInstance()) {
             return true;
@@ -81,22 +80,22 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         publicHudsonInstance.publishNewBuild(build);
 
         return true;
-    }  
-    
+    }
+
     public MatrixAggregator createAggregator(final MatrixBuild matrixBuild, Launcher launcher, BuildListener listener) {
-        
-        // Publishing of a matrix project is a little bit tricky. When MatrixRun is published, 
-        // parent MatrixProject has to be already created on the public side. Since MatrixRuns 
-        // run independently (~ danger of collision) and it would be difficult to make the creation 
+
+        // Publishing of a matrix project is a little bit tricky. When MatrixRun is published,
+        // parent MatrixProject has to be already created on the public side. Since MatrixRuns
+        // run independently (~ danger of collision) and it would be difficult to make the creation
         // operation atomic, only MatrixBuilds are allowed to do it.
-         
+
         return new MatrixAggregator(matrixBuild, launcher, listener) {
 
             @Override
             public boolean endBuild() throws InterruptedException, IOException {
                 return perform(matrixBuild, launcher, listener);
             }
-            
+
         };
     }
 
@@ -105,7 +104,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
     /*---------------------------------*/
 
     @Override
-    public BuildStepDescriptor<Publisher> getDescriptor() {
+    public BuildPublisherDescriptor getDescriptor() {
         return DESCRIPTOR;
     }
 
@@ -133,7 +132,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         public String getDisplayName() {
             return "Publish build";
         }
-        
+
 
         public void setRemoveTriggers(boolean removeTriggers) {
             this.removeTriggers = removeTriggers;
@@ -157,7 +156,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             }
             return bp;
         }
-        
+
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             String[] names = req.getParameterValues("bp.name");
@@ -177,7 +176,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
             }
 
             this.publicInstances = servers.toArray(new HudsonInstance[0]);
-            
+
             req.bindParameters(this, "bp.server.");
 
             save();
@@ -188,7 +187,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         public HudsonInstance[] getPublicInstances() {
             return publicInstances;
         }
-        
+
         public void setPublicInstances(HudsonInstance[] instaces){
             this.publicInstances = instaces;
         }
@@ -208,7 +207,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
                 server.loadProxy();
             }
         }
-        
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
@@ -218,7 +217,7 @@ public class BuildPublisher extends Notifier implements MatrixAggregatable {
         public String getHelpFile() {
             return "/plugin/build-publisher/help/config/publish.html";
         }
-        
+
     }
 
     public String getServerName() {
