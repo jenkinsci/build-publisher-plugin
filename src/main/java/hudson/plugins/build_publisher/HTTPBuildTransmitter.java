@@ -149,9 +149,18 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
 
             try {
                 login("j_security_check", hudsonInstance);
-            } catch (ServerFailureException e) {
+            } catch (ServerFailureException original) {
                 // Here if the servlet authentication is not available.
-                login("j_acegi_security_check", hudsonInstance);
+                try {
+                    login("j_acegi_security_check", hudsonInstance);
+                } catch (ServerFailureException acegy) {
+                    // Only one of these endpoints is supposed to exists at a time.
+                    // Do not report 404 as the other exception is likely to be more interesting.
+                    throw (acegy.getMethod().getStatusCode() == 404)
+                        ? original
+                        : acegy
+                    ;
+                }
             }
         }
 
