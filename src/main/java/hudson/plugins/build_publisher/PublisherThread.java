@@ -274,13 +274,8 @@ public class PublisherThread extends Thread {
     }
 
     private void assertUrlExists(String url) throws IOException, ServerFailureException {
-        if (!urlExists(url)) {
-            // wrong address, give up
-            throw new HttpException(url + ": URL doesn't exist");
-        }
+        executeMethod(new PostMethod(url));
     }
-
-    
 
     private boolean urlExists(String url) throws ServerFailureException, IOException {
 
