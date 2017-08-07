@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.build__publisher.BuildPublisher_-BuildPublisherDescriptor>
+  <publicInstances>
+    <hudson.plugins.build__publisher.HudsonInstance>
+      <url>fake://url.com/</url>
+      <name>NAME</name>
+      <login>LOGIN</login>
+      <password>PASSWORD</password>
+    </hudson.plugins.build__publisher.HudsonInstance>
+  </publicInstances>
+  <removeTriggers>false</removeTriggers>
+</hudson.plugins.build__publisher.BuildPublisher_-BuildPublisherDescriptor>
