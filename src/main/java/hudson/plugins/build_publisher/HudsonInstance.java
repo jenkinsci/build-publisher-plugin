@@ -38,7 +38,6 @@ import org.apache.commons.httpclient.params.HttpClientParams;
  * Represents remote public Hudson instance.
  *
  * @author dvrzalik@redhat.com
- *
  */
 public final class HudsonInstance {
 
@@ -142,11 +141,6 @@ public final class HudsonInstance {
         params.setSoTimeout(10 * 60 * 1000);
         client = new HttpClient(params, connectionManager);
         loadProxy();
-
-        // --- authentication
-        
-        //We don't use BASIC auth
-        //setCredentialsFroClient(client);
     }
 
     public void loadProxy(){
@@ -163,23 +157,6 @@ public final class HudsonInstance {
         if(publisherThread == null || !publisherThread.isAlive()) {
             publisherThread = new PublisherThread(HudsonInstance.this);
             publisherThread.start();
-        }
-    }
-
-    void setCredentialsFroClient(HttpClient httpClient) {
-        try {
-            URL sunUrl = new URL(url);
-            if (login != null) {
-                Credentials credentials = new UsernamePasswordCredentials(
-                        login, password);
-                httpClient.getState().setCredentials(
-                        new AuthScope(sunUrl.getHost(), AuthScope.ANY_PORT,
-                                AuthScope.ANY_REALM, AuthScope.ANY_SCHEME),
-                        credentials);
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -224,7 +201,6 @@ public final class HudsonInstance {
         // PublishRequest
         waitForRequest();
         return publishRequestQueue.iterator().next();
-
     }
 
     private void waitForRequest() {
@@ -274,7 +250,7 @@ public final class HudsonInstance {
                 if (project instanceof AbstractProject) {
                     Run build = ((AbstractProject) project)
                             .getBuildByNumber(holder.build);
-                    if (build instanceof AbstractBuild) {
+                    if (build != null) {
                         publishRequestQueue.add((AbstractBuild) build);
                     }
                 }
@@ -290,10 +266,9 @@ public final class HudsonInstance {
         int build;
         String project;
 
-        public RequestHolder(int build, String project) {
+        RequestHolder(int build, String project) {
             this.build = build;
             this.project = project;
         }
     }
-
 }
