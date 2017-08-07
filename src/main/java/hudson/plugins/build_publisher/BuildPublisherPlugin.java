@@ -21,7 +21,6 @@ import java.io.IOException;
  * {@link Plugin} for more about what can be done on this class.
  *
  * @author Kohsuke Kawaguchi
- * @plugin
  */
 public class BuildPublisherPlugin extends Plugin {
     @Extension

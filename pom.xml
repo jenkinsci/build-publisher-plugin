@@ -3,20 +3,26 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.535</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>2.32</version>
     </parent>
 
     <artifactId>build-publisher</artifactId>
     <packaging>hpi</packaging>
     <version>1.22-SNAPSHOT</version>
-    <name>Hudson Build-Publisher plugin </name>
+    <name>Build-Publisher plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
+
+    <properties>
+        <jenkins.version>1.609</jenkins.version>
+        <surefire.useFile>false</surefire.useFile>
+        <findbugs.failOnError>false</findbugs.failOnError>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <developers>
         <developer>
-            <id>vjuranek</id>
-            <name>Vojtech Juranek</name>
+            <id>olivergondza</id>
+            <name>Oliver Gondža</name>
         </developer>
     </developers>
 
@@ -25,7 +31,7 @@
         <developerConnection>scm:git:git@github.com:jenkinsci/build-publisher-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/build-publisher-plugin</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <repositories>
         <repository>
@@ -35,21 +41,38 @@
     </repositories>
 
     <dependencies>
+        <!-- Plugin deps -->
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>maven-plugin</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- Components -->
         <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <!-- Transitive dept from core and maven-plugin with version mismatch - hardcode the newer of the two -->
+            <version>1.9.2</version>
+        </dependency>
+
+        <!-- Test deps -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4</version>
+            <version>1.8</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>maven-plugin</artifactId>
-            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
@@ -59,7 +82,29 @@
         </dependency>
     </dependencies>
 
-
+    <profiles>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <javadoc.opts>-Xdoclint:none</javadoc.opts>
+            </properties>
+        </profile>
+    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <additionalparam>${javadoc.opts}</additionalparam>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <pluginRepositories>
         <pluginRepository>
@@ -68,4 +113,3 @@
         </pluginRepository>
     </pluginRepositories>
 </project>  
-

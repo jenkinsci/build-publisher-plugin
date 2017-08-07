@@ -87,7 +87,7 @@ public class PublisherThreadTest {
   @Test
   public void testPublishMatrixProjectWithEncodingNeed() throws Exception {
     switchToInternalJenkins();
-    MatrixProject project = source.createMatrixProject("~`1123456789( 0 )-_=qwertyuioplkjhgfdsazxcvbnm,.'\"{}");
+    MatrixProject project = source.createProject(MatrixProject.class, "~`1123456789( 0 )-_=qwertyuioplkjhgfdsazxcvbnm,.'\"{}");
     project.getBuildersList().add(new Shell("echo hello"));
     project.getPublishersList().add(publish());
     TextAxis axis = new TextAxis("user", "~`!1@2#3$4%5^6&7*8(9)0_-=}]{[Poiuytrewqasdfghjkl:;\"'||&&zxcv","bnm<>./?");
