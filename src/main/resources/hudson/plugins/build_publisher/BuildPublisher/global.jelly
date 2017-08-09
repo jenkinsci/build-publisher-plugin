@@ -20,8 +20,7 @@
           </f:entry>
         
           <f:entry title="Password" help="/plugin/build-publisher/help/global/password.html">
-            <input class="setting-input" name="bp.password"
-                   type="password" value="${serv.getPassword()}"/>
+            <f:password name="bp.password" value="${serv.getSecret()}"/>
           </f:entry>
 
           <f:entry>

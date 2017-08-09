@@ -16,8 +16,6 @@ import hudson.plugins.build_publisher.StatusInfo.State;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -25,9 +23,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 
-import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -46,7 +44,10 @@ public final class HudsonInstance {
     private String url;
     private String name;
     private String login;
-    private String password;
+    private Secret secret;
+
+    @Deprecated
+    private transient String password;
 
     // Builds to be published
     private transient LinkedHashSet<AbstractBuild> publishRequestQueue = new LinkedHashSet<AbstractBuild>();
@@ -59,8 +60,19 @@ public final class HudsonInstance {
         return login;
     }
 
-    public String getPassword() {
-        return password;
+    /**
+     * Get plaintext password.
+     */
+    /*package*/ String getPassword() {
+        return secret.getPlainText();
+    }
+
+    /**
+     * Get encrypted secret.
+     */
+    // Exposed for jelly
+    public Secret getSecret() {
+        return secret;
     }
 
     public boolean requiresAuthentication() {
@@ -71,12 +83,11 @@ public final class HudsonInstance {
         this.name = name;
         this.url = url;
         this.login = login;
-        this.password = password;
+        this.secret = Secret.fromString(password);
 
         initVariables();
         restoreQueue();
         initPublisherThread();
-
     }
 
     public String getUrl() {
@@ -118,6 +129,14 @@ public final class HudsonInstance {
 
     // XStream init
     private Object readResolve() {
+        // Migrate plaintext password to secret
+        if (password != null) {
+            if (secret == null) {
+                secret = Secret.fromString(password);
+                password = null;
+            }
+        }
+
         initVariables();
 
         // let's wait until Hudson's initialized
@@ -143,7 +162,7 @@ public final class HudsonInstance {
         loadProxy();
     }
 
-    public void loadProxy(){
+    void loadProxy(){
         Jenkins j = Jenkins.getInstance();
         ProxyConfiguration proxy = j!=null ? j.proxy : null;
         if(proxy != null) {

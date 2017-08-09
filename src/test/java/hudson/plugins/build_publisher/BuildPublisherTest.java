@@ -28,20 +28,27 @@ public class BuildPublisherTest {
         config.getInputByName("bp.password").setValueAttribute("PASSWORD");
         j.submit(config);
 
-        HudsonInstance[] publicInstances = BuildPublisher.DESCRIPTOR.getPublicInstances();
-        assertEquals(Arrays.toString(publicInstances), 1, publicInstances.length);
-        HudsonInstance name = publicInstances[0];
-        assertEquals("NAME", name.getName());
-        assertEquals("fake://url.com/", name.getUrl());
-        assertEquals("LOGIN", name.getLogin());
-        assertEquals("PASSWORD", name.getPassword());
+        testFilledValues(); // Correct after configuring
 
         page = wc.goTo("configure");
-        assertThat(page.getWebResponse().getContentAsString(), not(containsString("PASSWORD")));
+        config = page.getFormByName("config");
+
+        assertThat(
+                "Plaintext revealed",
+                page.getWebResponse().getContentAsString(),
+                not(containsString("PASSWORD"))
+        );
+        j.submit(config);
+
+        testFilledValues(); // Correct after roundtrip
     }
 
     @Test @LocalData
     public void migrateTo_1_22() throws Exception {
+        testFilledValues();
+    }
+
+    private void testFilledValues() {
         HudsonInstance[] publicInstances = BuildPublisher.DESCRIPTOR.getPublicInstances();
         assertEquals(Arrays.toString(publicInstances), 1, publicInstances.length);
         HudsonInstance name = publicInstances[0];
