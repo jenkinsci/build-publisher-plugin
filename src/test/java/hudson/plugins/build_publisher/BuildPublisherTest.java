@@ -8,6 +8,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
@@ -43,7 +44,7 @@ public class BuildPublisherTest {
         testFilledValues(); // Correct after roundtrip
     }
 
-    @Test @LocalData
+    @Test @LocalData @Issue("SECURITY-378")
     public void migrateTo_1_22() throws Exception {
         testFilledValues();
     }
