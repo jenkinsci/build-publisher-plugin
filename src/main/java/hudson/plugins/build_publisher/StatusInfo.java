@@ -29,6 +29,9 @@ public class StatusInfo {
         return exception;
     }
 
+    /**
+     * Plaintext message.
+     */
     public String getText() {
         return text;
     }

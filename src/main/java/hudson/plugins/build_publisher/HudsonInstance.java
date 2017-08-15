@@ -44,10 +44,7 @@ public final class HudsonInstance {
     private String url;
     private String name;
     private String login;
-    private Secret secret;
-
-    @Deprecated
-    private transient String password;
+    private Secret password;
 
     // Builds to be published
     private transient LinkedHashSet<AbstractBuild> publishRequestQueue = new LinkedHashSet<AbstractBuild>();
@@ -64,7 +61,7 @@ public final class HudsonInstance {
      * Get plaintext password.
      */
     /*package*/ String getPassword() {
-        return secret.getPlainText();
+        return password.getPlainText();
     }
 
     /**
@@ -72,7 +69,7 @@ public final class HudsonInstance {
      */
     // Exposed for jelly
     public Secret getSecret() {
-        return secret;
+        return password;
     }
 
     public boolean requiresAuthentication() {
@@ -83,7 +80,7 @@ public final class HudsonInstance {
         this.name = name;
         this.url = url;
         this.login = login;
-        this.secret = Secret.fromString(password);
+        this.password = Secret.fromString(password);
 
         initVariables();
         restoreQueue();
@@ -129,14 +126,6 @@ public final class HudsonInstance {
 
     // XStream init
     private Object readResolve() {
-        // Migrate plaintext password to secret
-        if (password != null) {
-            if (secret == null) {
-                secret = Secret.fromString(password);
-                password = null;
-            }
-        }
-
         initVariables();
 
         // let's wait until Hudson's initialized
