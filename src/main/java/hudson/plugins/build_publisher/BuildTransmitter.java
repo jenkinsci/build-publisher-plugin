@@ -17,7 +17,7 @@ public interface BuildTransmitter {
      * 
      * @param build Build to publish
      * @param hudsonInstance Targetted public hudson
-     * @throws java.io.IOException when an error occures
+     * @throws ServerFailureException when an error occures
      */
     public void sendBuild(AbstractBuild build, HudsonInstance hudsonInstance) throws ServerFailureException;
 
