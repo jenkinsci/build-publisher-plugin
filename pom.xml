@@ -14,7 +14,7 @@
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Build+Publisher+Plugin</url>
 
     <properties>
-        <jenkins.version>1.609</jenkins.version>
+        <jenkins.version>1.565</jenkins.version>
         <java.level>6</java.level>
         <!-- TODO fix the warnings -->
         <findbugs.failOnError>false</findbugs.failOnError>
