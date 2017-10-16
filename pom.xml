@@ -59,13 +59,6 @@
             <version>1.0</version>
         </dependency>
 
-        <!-- Components -->
-        <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1-jenkins-1</version>
-        </dependency>
-
         <!-- Test deps -->
         <dependency>
             <groupId>commons-codec</groupId>
