@@ -79,7 +79,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
             Header responseHeader = method.getResponseHeader("X-Build-Recieved");
             if((responseHeader == null) || 
                     !project.getName().equals(responseHeader.getValue().trim())) {
-                    throw new HttpException("Remote instance didn't confirm recieving this build");
+                    throw new HttpException("Remote instance didn't confirm receiving this build");
             }
             
         } catch (IOException e) {
@@ -128,8 +128,6 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
      *
      * @throws ServerFailureException
      *      If we encounter >400 error code from the server.
-     * @throws IOException
-     *      Other generic communication exception.
      */
     static HttpMethod executeMethod(HttpMethodBase method,
             HudsonInstance hudsonInstance) throws ServerFailureException {
@@ -259,25 +257,32 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         return files.length;
     }
 
+    /**
+     * Write buffer to tar.
+     *
+     * @param in The stream to read from. Will be closed upon method completion.
+     */
     private void writeStreamToTar(TarOutputStream tar, InputStream in,
-            String fileName, long length, byte[] buf) throws IOException {
-        TarEntry te = new TarEntry(fileName);
-        te.setSize(length);
+            String fileName, long length, byte[] buf
+    ) throws IOException {
+        try {
+            TarEntry te = new TarEntry(fileName);
+            te.setSize(length);
 
-        tar.putNextEntry(te);
+            tar.putNextEntry(te);
 
-        int len;
-        while ((len = in.read(buf)) >= 0) {
+            int len;
+            while ((len = in.read(buf)) >= 0) {
 
-            if (aborted) {
-                break;
+                if (aborted) {
+                    break;
+                }
+
+                tar.write(buf, 0, len);
             }
-
-            tar.write(buf, 0, len);
+            tar.closeEntry();
+        } finally {
+            in.close();
         }
-        tar.closeEntry();
-
-        in.close();
     }
-
 }
