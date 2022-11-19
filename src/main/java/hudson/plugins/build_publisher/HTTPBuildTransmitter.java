@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import org.apache.commons.httpclient.HttpException;
 
@@ -64,7 +65,7 @@ public class HTTPBuildTransmitter implements BuildTransmitter {
         OutputStream out = null;
         try {
 
-            tempFile = File.createTempFile("hudson_bp", ".tar");
+            tempFile = Files.createTempFile("hudson_bp", ".tar").toFile();
             out = new FileOutputStream(tempFile);
             writeToTar(out, build);
             
